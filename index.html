@@ -379,67 +379,23 @@ const GRADE_COLORS = {
 };
 
 // 預設示範資料
-const DEFAULT_CASES = [
-  {
-    id: 'c1', status: 'proposal', company: '緯謙科技股份有限公司',
-    activity: '星際奇兵 / 赤壁之戰', grade: 'B+',
-    date: '2026-07-10', quote: '未定', headcount: '30人',
-    checklist: [
-      { id: 'ck1', text: '確認場地 CLCC 可用日期', done: true },
-      { id: 'ck2', text: '寄出提案簡報', done: true },
-      { id: 'ck3', text: '跟進客戶回覆', done: false },
-      { id: 'ck4', text: '確認人數與時段', done: false },
-    ],
-    note: '客戶希望場地鄰近公司，CLCC B廳 45坪，優惠價 15,645 含稅。\n7/3 或 7/10 下午均可。',
-    nextAction: '跟進客戶回覆簡報',
-  },
-  {
-    id: 'c2', status: 'waiting', company: '知和公關顧問有限公司',
-    activity: '待確認', grade: 'B',
-    date: '2026-07-27', quote: '未定', headcount: '未定',
-    checklist: [
-      { id: 'ck5', text: '5/5 線上討論後整理需求', done: true },
-      { id: 'ck6', text: '準備提案方向', done: false },
-    ],
-    note: '5/5 14:30 線上討論過，需進一步確認活動方向。',
-    nextAction: '寄出提案',
-  },
-  {
-    id: 'c3', status: 'closing', company: '源隆技術顧問有限公司',
-    activity: '自力造筏 1天', grade: 'B+',
-    date: '2026-08-01', quote: '140,000', headcount: '未定',
-    checklist: [
-      { id: 'ck7', text: '寄出提案', done: true },
-      { id: 'ck8', text: '客戶確認方案', done: true },
-      { id: 'ck9', text: '確認合約細節', done: false },
-      { id: 'ck10', text: '收取訂金', done: false },
-    ],
-    note: '8月執行，14萬報價。等待合約確認中。',
-    nextAction: '催促合約簽署',
-  },
-];
+const DEFAULT_CASES = [{"id": "c429", "status": "waiting", "company": "臺大兒童醫院", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "50-100人", "checklist": [{"id": "ck429a", "text": "確認客戶需求", "done": true}, {"id": "ck429b", "text": "寄出提案簡報", "done": true}, {"id": "ck429c", "text": "跟進客戶回覆", "done": false}], "note": "[05/25] [LINE] 已加入官方LINE\n[06/03] [LINE] 已加入官方LINE\n[06/03] 5/25 提案內容：\n50人課程-團隊大富翁95000元，並附上場地選擇，經電話聯繫後，課程改為拼畫、人數不變、課程費用不變。\n5/26 電話紀錄：\n1. 課程/活動含稅，並預估人數上升至70人、至多100人時每人費用\n2. 提供場地＆餐食於人數提升至70人時的確切配套\n3. 拼畫最終成果呈現內容、大團隊暖身活動內容\n5/27 加入代辦：遊覽車＠9000未稅、西密道導覽@200、餐盒@140元\n5/27-6/2 瘋狂改報價單項目、參與人數、餐費超過140元以上的挪移＆代辦費與稅內", "nextAction": ""}, {"id": "c430", "status": "waiting", "company": "建準電機", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "200人", "checklist": [{"id": "ck430a", "text": "確認客戶需求", "done": true}, {"id": "ck430b", "text": "寄出提案簡報", "done": true}, {"id": "ck430c", "text": "跟進客戶回覆", "done": false}], "note": "[06/03] [LINE] 尚未加入官方LINE", "nextAction": ""}, {"id": "c440", "status": "proposal", "company": "台灣默克股份有限公司", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "84人", "checklist": [{"id": "ck440a", "text": "確認客戶需求", "done": true}, {"id": "ck440b", "text": "準備提案簡報", "done": false}, {"id": "ck440c", "text": "寄出提案", "done": false}], "note": "", "nextAction": ""}, {"id": "c456", "status": "prepare", "company": "德誼數位科技股份有限公司", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "90人", "checklist": [], "note": "", "nextAction": ""}, {"id": "c463", "status": "proposal", "company": "大瓏企業股份有限公司", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "60人", "checklist": [{"id": "ck463a", "text": "確認客戶需求", "done": true}, {"id": "ck463b", "text": "準備提案簡報", "done": false}, {"id": "ck463c", "text": "寄出提案", "done": false}], "note": "[06/08] 需要一個公司簡介、企業案例分享、一個量身訂作等三個章節的簡報，偏好週五六辦理，週五上午至少要有2小時課程，不能只有移動然後就吃飯，有詢問夜間是否有活動，整體需求是1.5天、要有學習收斂、需要激勵團隊並能感染正向氣息", "nextAction": ""}, {"id": "c467", "status": "proposal", "company": "群悅科技股份有限公司", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "20人", "checklist": [{"id": "ck467a", "text": "確認客戶需求", "done": true}, {"id": "ck467b", "text": "準備提案簡報", "done": false}, {"id": "ck467c", "text": "寄出提案", "done": false}], "note": "[06/09] 6/8 電話聯繫需要能有含場地費用每人2000的課程，擬提案打造one team\n[LINE] 尚未加入官方LINE", "nextAction": ""}, {"id": "c470", "status": "waiting", "company": "金龍永盛旅行社台南分公司", "activity": "黃金比例運動會", "grade": "", "date": "", "quote": "135000未稅", "headcount": "110人", "checklist": [{"id": "ck470a", "text": "確認客戶需求", "done": true}, {"id": "ck470b", "text": "寄出提案簡報", "done": true}, {"id": "ck470c", "text": "跟進客戶回覆", "done": false}], "note": "[06/09] 6/8 承辦休假；6/9提供提案簡報、待電聯追蹤\n[LINE] 已加入官方LINE", "nextAction": ""}, {"id": "c475", "status": "closing", "company": "迪卡儂", "activity": "黃金比例運動會", "grade": "", "date": "", "quote": "120000未稅", "headcount": "110人", "checklist": [{"id": "ck475a", "text": "確認客戶需求", "done": true}, {"id": "ck475b", "text": "寄出提案簡報", "done": true}, {"id": "ck475c", "text": "跟進客戶回覆", "done": false}], "note": "[06/09] [LINE] 已加入官方LINE\n[06/10] [LINE] 已加入官方LINE", "nextAction": ""}, {"id": "c484", "status": "prepare", "company": "台灣基恩斯股份有限公司", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "200人", "checklist": [], "note": "", "nextAction": ""}];
 
-const DEFAULT_NOTES = [
-  {
-    id: 'n1', company: '緯謙科技股份有限公司',
-    date: '2026-05-06',
-    content: '希望場地鄰近公司（台北市）\n活動時間：下午 3~3.5小時\n器材需求：星際奇兵、赤壁之戰、亂打秀（音樂教室）\nCLCC B廳 45坪可，兩天均有空檔',
-    tags: ['星際奇兵', '7月', '30人'],
-  },
-  {
-    id: 'n2', company: '知和公關顧問有限公司',
-    date: '2026-05-05',
-    content: '5/5 14:30 線上討論（竹瑾 + 我）\n討論客戶後續提案方向\n執行月：7/27',
-    tags: ['7月'],
-  },
-];
+const DEFAULT_NOTES = [];
 
 // ══════════════════════════════════════════════
 // 狀態管理
 // ══════════════════════════════════════════════
 
-let cases = JSON.parse(localStorage.getItem('kanban_cases') || 'null') || DEFAULT_CASES;
-let notes = JSON.parse(localStorage.getItem('kanban_notes') || 'null') || DEFAULT_NOTES;
+let cases, notes;
+try {
+  const savedCases = localStorage.getItem('kanban_cases');
+  cases = savedCases ? JSON.parse(savedCases) : DEFAULT_CASES;
+} catch(e) { cases = DEFAULT_CASES; }
+try {
+  const savedNotes = localStorage.getItem('kanban_notes');
+  notes = savedNotes ? JSON.parse(savedNotes) : DEFAULT_NOTES;
+} catch(e) { notes = DEFAULT_NOTES; }
 let currentCaseId = null;
 
 function save() {
@@ -741,7 +697,7 @@ function renderWeek() {
     col.innerHTML = `
       <div class="day-header">
         <div class="day-name">週${DAYS[i]}</div>
-        <div class="day-date ${isToday?'today'}">${d.getMonth()+1}/${d.getDate()}</div>
+        <div class="day-date ${isToday ? "today" : ""}">${d.getMonth()+1}/${d.getDate()}</div>
       </div>
       <div class="day-body">
         ${dayCases.map(c => {
