@@ -6,236 +6,203 @@
 <title>我的案件看板</title>
 <style>
   :root {
-    --bg: #F2F4F7;
-    --surface: #FFFFFF;
-    --border: #E2E6EC;
-    --text: #1A2236;
-    --muted: #7A8AAA;
-    --dim: #B0BCD4;
-    --blue: #2C6EE8;
-    --blue-light: #EEF4FF;
-    --green: #18A96B;
-    --green-light: #EDFAF3;
-    --amber: #D4860A;
-    --amber-light: #FFF8EC;
-    --red: #E03E3E;
-    --red-light: #FFF0F0;
-    --violet: #6B4FC8;
-    --violet-light: #F3F0FF;
-    --r: 10px;
-    --shadow: 0 1px 4px rgba(0,0,0,.07), 0 4px 16px rgba(0,0,0,.04);
+    --bg: #F2F4F7; --surface: #FFFFFF; --border: #E2E6EC;
+    --text: #1A2236; --muted: #7A8AAA; --dim: #B0BCD4;
+    --blue: #2C6EE8; --blue-light: #EEF4FF;
+    --green: #18A96B; --green-light: #EDFAF3;
+    --amber: #D4860A; --amber-light: #FFF8EC;
+    --red: #E03E3E; --red-light: #FFF0F0;
+    --violet: #6B4FC8; --violet-light: #F3F0FF;
+    --r: 10px; --shadow: 0 1px 4px rgba(0,0,0,.07), 0 4px 16px rgba(0,0,0,.04);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, 'Noto Sans TC', 'PingFang TC', Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-  }
+  body { font-family: -apple-system,'Noto Sans TC','PingFang TC',Arial,sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
 
-  /* ── HEADER ── */
-  .header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 56px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
+  /* HEADER */
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
   .header-left { display: flex; align-items: center; gap: 12px; }
-  .header-logo { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -.02em; }
+  .header-logo { font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
   .header-logo span { color: var(--blue); }
   .header-sub { font-size: 12px; color: var(--muted); border-left: 1px solid var(--border); padding-left: 12px; }
   .header-right { display: flex; align-items: center; gap: 8px; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 14px; border-radius: 7px; font-size: 13px;
-    font-weight: 500; cursor: pointer; border: none; transition: all .15s;
-  }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; }
   .btn-primary { background: var(--blue); color: #fff; }
   .btn-primary:hover { background: #1a5cd4; }
   .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
   .btn-ghost:hover { background: var(--bg); color: var(--text); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-icon { padding: 6px 8px; font-size: 14px; }
 
-  /* ── TABS ── */
-  .tabs {
-    display: flex; gap: 0;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-  }
-  .tab {
-    padding: 12px 16px; font-size: 13px; font-weight: 500;
-    color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
-    transition: all .15s; white-space: nowrap;
-  }
+  /* TABS */
+  .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; overflow-x: auto; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 12px 16px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; white-space: nowrap; }
   .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
   .tab:hover:not(.active) { color: var(--text); }
 
-  /* ── MAIN ── */
+  /* MAIN */
   .main { padding: 20px 24px; }
   .view { display: none; }
   .view.active { display: block; }
 
-  /* ── SUMMARY ROW ── */
+  /* SEARCH */
+  .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .search-wrap { position: relative; }
+  .search-wrap input { padding: 7px 10px 7px 30px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; width: 220px; background: var(--surface); color: var(--text); }
+  .search-wrap input:focus { outline: none; border-color: var(--blue); }
+  .search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; font-size: 13px; }
+  .chips { display: flex; gap: 5px; flex-wrap: wrap; }
+  .chip { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--muted); transition: all .15s; }
+  .chip.on { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+  /* SUMMARY */
   .summary-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-  .sum-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); padding: 14px 18px; flex: 1; min-width: 120px;
-    box-shadow: var(--shadow);
-  }
-  .sum-num { font-size: 26px; font-weight: 700; line-height: 1; }
+  .sum-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 18px; flex: 1; min-width: 110px; box-shadow: var(--shadow); }
+  .sum-num { font-size: 24px; font-weight: 700; line-height: 1; }
   .sum-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-  /* ── KANBAN ── */
+  /* KANBAN */
   .kanban { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 12px; align-items: flex-start; }
   .kanban::-webkit-scrollbar { height: 6px; }
   .kanban::-webkit-scrollbar-track { background: var(--border); border-radius: 3px; }
   .kanban::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 3px; }
-  .column {
-    min-width: 260px; width: 260px; flex-shrink: 0;
-    background: var(--bg); border-radius: var(--r);
-    border: 1px solid var(--border); overflow: hidden;
-  }
-  .col-header {
-    padding: 12px 14px; display: flex; align-items: center;
-    justify-content: space-between; border-bottom: 1px solid var(--border);
-  }
-  .col-title { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .column { min-width: 255px; width: 255px; flex-shrink: 0; background: var(--bg); border-radius: var(--r); border: 1px solid var(--border); overflow: hidden; }
+  .col-header { padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .col-title { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
   .col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .col-count { font-size: 11px; color: var(--muted); background: var(--border); padding: 2px 7px; border-radius: 10px; }
-  .col-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 80px; }
-  .col-add { padding: 8px 10px; }
-  .col-add-btn {
-    width: 100%; padding: 7px; border-radius: 7px; border: 1px dashed var(--dim);
-    background: transparent; color: var(--muted); font-size: 12px; cursor: pointer;
-    transition: all .15s;
-  }
+  .col-body { padding: 8px; display: flex; flex-direction: column; gap: 7px; min-height: 80px; }
+  .col-add { padding: 6px 8px; }
+  .col-add-btn { width: 100%; padding: 7px; border-radius: 7px; border: 1px dashed var(--dim); background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; transition: all .15s; }
   .col-add-btn:hover { background: var(--surface); color: var(--text); border-color: var(--blue); }
 
-  /* ── CARD ── */
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 8px; padding: 12px 14px; cursor: pointer;
-    box-shadow: var(--shadow); transition: all .15s;
-    position: relative;
-  }
+  /* CARD */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 11px 13px; cursor: pointer; box-shadow: var(--shadow); transition: all .15s; }
   .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); transform: translateY(-1px); }
-  .card-grade {
-    display: inline-flex; align-items: center;
-    font-size: 10px; font-weight: 700; padding: 2px 7px;
-    border-radius: 4px; margin-bottom: 8px;
-  }
-  .card-company { font-size: 13px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
-  .card-activity { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
-  .card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-  .meta-chip {
-    font-size: 10px; padding: 2px 7px; border-radius: 4px;
-    background: var(--bg); color: var(--muted); border: 1px solid var(--border);
-    display: inline-flex; align-items: center; gap: 4px;
-  }
-  .card-checklist { margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; }
-  .checklist-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
-  .checklist-row input[type=checkbox] { accent-color: var(--blue); cursor: pointer; flex-shrink: 0; }
-  .checklist-row label { font-size: 11px; color: var(--muted); cursor: pointer; line-height: 1.4; }
-  .checklist-row.done label { text-decoration: line-through; color: var(--dim); }
-  .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .card-grade { display: inline-flex; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; margin-bottom: 7px; }
+  .card-company { font-size: 13px; font-weight: 600; margin-bottom: 5px; line-height: 1.4; }
+  .card-activity { font-size: 11px; color: var(--muted); margin-bottom: 7px; }
+  .card-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 7px; }
+  .meta-chip { font-size: 10px; padding: 2px 7px; border-radius: 4px; background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 7px; }
   .card-due { font-size: 10px; color: var(--muted); }
   .card-due.urgent { color: var(--red); font-weight: 600; }
   .card-due.soon { color: var(--amber); font-weight: 600; }
-  .card-note-btn { font-size: 10px; color: var(--blue); cursor: pointer; text-decoration: none; }
 
-  /* ── DETAIL PANEL ── */
-  .overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,.4);
-    z-index: 200; display: none; align-items: flex-start; justify-content: flex-end;
-  }
+  /* PANEL */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; display: none; align-items: flex-start; justify-content: flex-end; }
   .overlay.open { display: flex; }
-  .panel {
-    width: 420px; max-width: 100vw; height: 100vh; background: var(--surface);
-    overflow-y: auto; box-shadow: -4px 0 24px rgba(0,0,0,.12);
-    animation: slideIn .2s ease;
-  }
+  .panel { width: 420px; max-width: 100vw; height: 100vh; background: var(--surface); overflow-y: auto; box-shadow: -4px 0 24px rgba(0,0,0,.12); animation: slideIn .2s ease; }
   @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-  .panel-header {
-    padding: 16px 20px; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; background: var(--surface); z-index: 10;
-  }
+  .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--surface); z-index: 10; }
   .panel-title { font-size: 15px; font-weight: 600; }
   .panel-close { font-size: 20px; color: var(--muted); cursor: pointer; border: none; background: none; padding: 4px; }
   .panel-body { padding: 20px; }
-  .field-group { margin-bottom: 18px; }
+  .field-group { margin-bottom: 16px; }
   .field-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
-  .field-value { font-size: 13px; color: var(--text); line-height: 1.6; }
-  input[type=text], input[type=date], select, textarea {
-    width: 100%; padding: 8px 10px; border: 1px solid var(--border);
-    border-radius: 7px; font-size: 13px; color: var(--text);
-    background: var(--surface); font-family: inherit;
-    transition: border-color .15s;
-  }
-  input:focus, select:focus, textarea:focus {
-    outline: none; border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(44,110,232,.1);
-  }
+  input[type=text], input[type=date], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; color: var(--text); background: var(--surface); font-family: inherit; transition: border-color .15s; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(44,110,232,.1); }
   textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
-  .checklist-editor { }
   .checklist-item-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   .checklist-item-row input[type=checkbox] { accent-color: var(--blue); flex-shrink: 0; }
   .checklist-item-row input[type=text] { flex: 1; }
-  .checklist-item-row .del-btn { color: var(--dim); cursor: pointer; font-size: 16px; border: none; background: none; padding: 0 4px; flex-shrink: 0; }
-  .checklist-item-row .del-btn:hover { color: var(--red); }
-  .add-item-btn { font-size: 12px; color: var(--blue); cursor: pointer; border: none; background: none; padding: 4px 0; margin-top: 2px; }
+  .del-btn { color: var(--dim); cursor: pointer; font-size: 16px; border: none; background: none; padding: 0 4px; flex-shrink: 0; }
+  .del-btn:hover { color: var(--red); }
+  .add-item-btn { font-size: 12px; color: var(--blue); cursor: pointer; border: none; background: none; padding: 4px 0; }
 
-  /* ── WEEK VIEW ── */
-  .week-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-  .day-col { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
-  .day-header { padding: 10px 12px; border-bottom: 1px solid var(--border); }
-  .day-name { font-size: 11px; font-weight: 600; color: var(--muted); }
-  .day-date { font-size: 18px; font-weight: 700; color: var(--text); }
-  .day-date.today { color: var(--blue); }
-  .day-body { padding: 8px; min-height: 120px; display: flex; flex-direction: column; gap: 6px; }
-  .day-task {
-    padding: 6px 10px; border-radius: 6px; font-size: 12px;
-    border-left: 3px solid; cursor: pointer;
-  }
-  .day-task:hover { opacity: .8; }
+  /* CALENDAR */
+  .cal-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .cal-title { font-size: 16px; font-weight: 700; }
+  .cal-nav-group { display: flex; gap: 6px; }
+  .cal-btn { padding: 6px 13px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-size: 13px; color: var(--text); transition: all .15s; }
+  .cal-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .cal-btn.accent { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .cal-btn.accent:hover { background: #1a5cd4; }
+  .cal-head { display: grid; grid-template-columns: 32px repeat(7,1fr); gap: 3px; margin-bottom: 4px; }
+  .cal-head div { text-align: center; font-size: 11px; font-weight: 600; color: var(--muted); padding: 4px 0; }
+  .cal-grid { display: flex; flex-direction: column; gap: 3px; }
+  .cal-row { display: grid; grid-template-columns: 32px repeat(7,1fr); gap: 3px; border-radius: 8px; }
+  .cal-row.cur-week { background: var(--blue-light); }
+  .cal-wnum { display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--dim); font-weight: 600; }
+  .cal-cell { min-height: 76px; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 5px; cursor: pointer; transition: border-color .15s; }
+  .cal-cell:hover { border-color: var(--blue); }
+  .cal-cell.other { opacity: .38; }
+  .cal-cell.today { border-color: var(--blue); border-width: 2px; }
+  .cal-dn { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+  .cal-cell.today .cal-dn { background: var(--blue); color: #fff; }
+  .cal-cell.sun .cal-dn { color: var(--red); }
+  .cal-cell.sat .cal-dn { color: var(--blue); }
+  .cal-ev { font-size: 10px; padding: 2px 4px; border-radius: 3px; margin-bottom: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 1.3; }
+  .cal-more { font-size: 10px; color: var(--muted); }
 
-  /* ── NOTE VIEW ── */
-  .note-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-  .note-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); padding: 16px; box-shadow: var(--shadow); cursor: pointer;
-    transition: all .15s;
-  }
+  /* PIPELINE */
+  .funnel { display: flex; gap: 0; overflow-x: auto; margin-bottom: 20px; padding-bottom: 4px; }
+  .funnel-stage { flex: 1; min-width: 130px; }
+  .funnel-inner { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 10px; margin: 0 4px; box-shadow: var(--shadow); text-align: center; }
+  .funnel-dot { width: 10px; height: 10px; border-radius: 50%; margin: 0 auto 6px; }
+  .funnel-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+  .funnel-count { font-size: 30px; font-weight: 700; line-height: 1; margin-bottom: 2px; }
+  .funnel-val { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .funnel-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
+  .funnel-fill { height: 100%; border-radius: 3px; }
+  .funnel-cases { text-align: left; }
+  .funnel-chip { display: block; font-size: 11px; padding: 3px 6px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  .funnel-arrow { display: flex; align-items: center; color: var(--dim); font-size: 18px; flex-shrink: 0; align-self: center; }
+  .insight-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(210px,1fr)); gap: 12px; }
+  .insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; box-shadow: var(--shadow); }
+  .insight-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+  .insight-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; cursor: pointer; }
+  .insight-row:last-child { border-bottom: none; }
+
+  /* HISTORY */
+  .h-filter { display: flex; gap: 6px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .h-group { margin-bottom: 14px; }
+  .h-date { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .06em; padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+  .h-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .h-item:last-child { border-bottom: none; }
+  .h-icon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .h-text { flex: 1; font-size: 12px; line-height: 1.5; }
+  .h-company { font-weight: 600; }
+  .h-detail { color: var(--muted); }
+  .h-time { font-size: 10px; color: var(--dim); flex-shrink: 0; padding-top: 2px; }
+
+  /* NOTES */
+  .note-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(275px,1fr)); gap: 12px; }
+  .note-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; box-shadow: var(--shadow); cursor: pointer; transition: all .15s; }
   .note-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); transform: translateY(-1px); }
   .note-company { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-  .note-date { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+  .note-date { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
   .note-content { font-size: 12px; color: var(--muted); line-height: 1.7; white-space: pre-wrap; }
-  .note-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 
-  /* ── MODAL ── */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 300; display: none; align-items: center; justify-content: center; }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border-radius: 12px; padding: 24px; width: 480px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.2); }
+  /* MODAL */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 300; display: none; align-items: center; justify-content: center; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 12px; padding: 24px; width: 500px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.2); }
   .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 18px; }
   .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
 
-  /* ── UTILS ── */
-  .tag { display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
-  .divider { height: 1px; background: var(--border); margin: 16px 0; }
-  .empty { text-align: center; padding: 32px 16px; color: var(--muted); font-size: 13px; }
-  @media (max-width: 600px) {
+  /* COL MANAGER */
+  .col-mgr-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .col-mgr-row:last-child { border-bottom: none; }
+  .col-color-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; cursor: pointer; border: 2px solid var(--border); }
+  .col-mgr-row input[type=text] { flex: 1; }
+  .col-mgr-row input[type=color] { width: 30px; height: 30px; padding: 2px; border-radius: 5px; cursor: pointer; border: 1px solid var(--border); }
+  .col-order-btn { padding: 3px 7px; border-radius: 5px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; font-size: 12px; color: var(--muted); }
+  .col-order-btn:hover { background: var(--surface); color: var(--text); }
+
+  /* UTILS */
+  .tag { display: inline-flex; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+  .empty { text-align: center; padding: 28px 16px; color: var(--muted); font-size: 13px; }
+  .section-hd { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+
+  @media (max-width:640px) {
     .main { padding: 12px; }
-    .kanban { gap: 10px; }
     .column { min-width: 220px; width: 220px; }
-    .week-grid { grid-template-columns: repeat(2, 1fr); }
     .panel { width: 100vw; }
+    .cal-cell { min-height: 56px; }
+    .funnel { flex-direction: column; }
+    .funnel-arrow { transform: rotate(90deg); align-self: auto; margin: 4px auto; }
   }
 </style>
 </head>
@@ -244,46 +211,89 @@
 <div class="header">
   <div class="header-left">
     <div class="header-logo">案件<span>看板</span></div>
-    <div class="header-sub">個人工作追蹤</div>
+    <div class="header-sub" id="hdr-week">個人工作追蹤</div>
   </div>
   <div class="header-right">
+    <button class="btn btn-ghost btn-sm" onclick="exportData()">↓ 匯出</button>
+    <button class="btn btn-ghost btn-sm" onclick="openColMgr()">⚙ 流程管理</button>
     <button class="btn btn-ghost" onclick="openAddModal()">＋ 新增案件</button>
   </div>
 </div>
 
 <div class="tabs">
   <div class="tab active" onclick="switchTab('kanban')">🗂 看板</div>
-  <div class="tab" onclick="switchTab('week')">📅 本週待辦</div>
+  <div class="tab" onclick="switchTab('pipeline')">📊 流程分析</div>
+  <div class="tab" onclick="switchTab('calendar')">📅 行事曆</div>
   <div class="tab" onclick="switchTab('notes')">📝 客戶筆記</div>
+  <div class="tab" onclick="switchTab('history')">🕐 歷史</div>
 </div>
 
 <div class="main">
 
-  <!-- ── 看板 ── -->
+  <!-- 看板 -->
   <div class="view active" id="view-kanban">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="q" placeholder="搜尋公司、活動…" oninput="renderKanban()">
+      </div>
+      <div class="chips" id="grade-chips"></div>
+    </div>
     <div class="summary-row" id="summary-row"></div>
     <div class="kanban" id="kanban-board"></div>
   </div>
 
-  <!-- ── 本週待辦 ── -->
-  <div class="view" id="view-week">
-    <div class="week-grid" id="week-grid"></div>
+  <!-- 流程分析 -->
+  <div class="view" id="view-pipeline">
+    <div id="pipeline-content"></div>
   </div>
 
-  <!-- ── 客戶筆記 ── -->
+  <!-- 行事曆 -->
+  <div class="view" id="view-calendar">
+    <div class="cal-toolbar">
+      <div class="cal-title" id="cal-title"></div>
+      <div class="cal-nav-group">
+        <button class="cal-btn" onclick="calMove(-1)">‹ 上月</button>
+        <button class="cal-btn accent" onclick="calToday()">今天</button>
+        <button class="cal-btn" onclick="calMove(1)">下月 ›</button>
+      </div>
+    </div>
+    <div class="cal-head">
+      <div>週</div>
+      <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div>
+      <div style="color:var(--blue)">六</div><div style="color:var(--red)">日</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+
+  <!-- 客戶筆記 -->
   <div class="view" id="view-notes">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div style="font-size:13px;color:var(--muted)">每個客戶一頁，記錄溝通重點、需求細節、重要日期</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:13px;color:var(--muted)">每個客戶一頁，記錄溝通重點與需求細節</div>
       <button class="btn btn-primary" onclick="openNoteModal()">＋ 新增筆記</button>
     </div>
     <div class="note-grid" id="note-grid"></div>
   </div>
 
+  <!-- 歷史紀錄 -->
+  <div class="view" id="view-history">
+    <div class="h-filter">
+      <span style="font-size:12px;color:var(--muted)">篩選：</span>
+      <div class="chip on"  onclick="setHFilter('all',this)">全部</div>
+      <div class="chip" onclick="setHFilter('add',this)">新增案件</div>
+      <div class="chip" onclick="setHFilter('status_change',this)">狀態變更</div>
+      <div class="chip" onclick="setHFilter('delete',this)">刪除</div>
+      <div class="chip" onclick="setHFilter('note_add',this)">筆記</div>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="clearHistory()">清除</button>
+    </div>
+    <div id="history-feed"></div>
+  </div>
+
 </div>
 
-<!-- ── 案件詳情側欄 ── -->
-<div class="overlay" id="panel-overlay" onclick="closePanel(event)">
-  <div class="panel" id="detail-panel">
+<!-- 側欄 -->
+<div class="overlay" id="panel-overlay" onclick="closePanelBg(event)">
+  <div class="panel">
     <div class="panel-header">
       <div class="panel-title" id="panel-title">案件詳情</div>
       <button class="panel-close" onclick="closePanel()">✕</button>
@@ -292,21 +302,15 @@
   </div>
 </div>
 
-<!-- ── 新增案件 Modal ── -->
-<div class="modal-overlay" id="add-modal">
+<!-- 新增案件 Modal -->
+<div class="modal-bg" id="add-modal">
   <div class="modal">
     <div class="modal-title">新增案件</div>
-    <div class="field-group">
-      <div class="field-label">公司名稱 *</div>
-      <input type="text" id="new-company" placeholder="例：台積電">
-    </div>
-    <div class="field-group">
-      <div class="field-label">提案活動</div>
-      <input type="text" id="new-activity" placeholder="例：王者天下、星際奇兵">
-    </div>
+    <div class="field-group"><div class="field-label">公司名稱 *</div><input type="text" id="nc-company" placeholder="例：台積電"></div>
+    <div class="field-group"><div class="field-label">提案活動</div><input type="text" id="nc-activity" placeholder="例：王者天下"></div>
     <div class="field-group">
       <div class="field-label">案件分級</div>
-      <select id="new-grade">
+      <select id="nc-grade">
         <option value="">— 選擇分級 —</option>
         <option value="A">A — 高階組織訓練</option>
         <option value="A-">A- — 組織痛點需求</option>
@@ -317,17 +321,12 @@
         <option value="D">D — 公關/行銷/旅遊</option>
       </select>
     </div>
+    <div class="field-group"><div class="field-label">預計執行日期</div><input type="date" id="nc-date"></div>
+    <div class="field-group"><div class="field-label">報價</div><input type="text" id="nc-quote" placeholder="例：120,000"></div>
+    <div class="field-group"><div class="field-label">人數</div><input type="text" id="nc-headcount" placeholder="例：50人"></div>
     <div class="field-group">
-      <div class="field-label">預計執行日期</div>
-      <input type="date" id="new-date">
-    </div>
-    <div class="field-group">
-      <div class="field-label">報價</div>
-      <input type="text" id="new-quote" placeholder="例：120,000">
-    </div>
-    <div class="field-group">
-      <div class="field-label">人數</div>
-      <input type="text" id="new-headcount" placeholder="例：50人">
+      <div class="field-label">放入欄位</div>
+      <select id="nc-status"></select>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeAddModal()">取消</button>
@@ -336,18 +335,12 @@
   </div>
 </div>
 
-<!-- ── 新增筆記 Modal ── -->
-<div class="modal-overlay" id="note-modal">
+<!-- 新增筆記 Modal -->
+<div class="modal-bg" id="note-modal">
   <div class="modal">
     <div class="modal-title">新增客戶筆記</div>
-    <div class="field-group">
-      <div class="field-label">客戶名稱 *</div>
-      <input type="text" id="note-company" placeholder="例：知和公關">
-    </div>
-    <div class="field-group">
-      <div class="field-label">筆記內容</div>
-      <textarea id="note-content" rows="5" placeholder="溝通重點、客戶需求、重要細節..."></textarea>
-    </div>
+    <div class="field-group"><div class="field-label">客戶名稱 *</div><input type="text" id="nn-company" placeholder="例：知和公關"></div>
+    <div class="field-group"><div class="field-label">筆記內容</div><textarea id="nn-content" rows="5" placeholder="溝通重點、客戶需求、重要細節…"></textarea></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeNoteModal()">取消</button>
       <button class="btn btn-primary" onclick="addNote()">新增</button>
@@ -355,474 +348,664 @@
   </div>
 </div>
 
-<script>
-// ══════════════════════════════════════════════
-// 資料結構
-// ══════════════════════════════════════════════
+<!-- 行事曆日期 Modal -->
+<div class="modal-bg" id="cal-modal">
+  <div class="modal" style="width:380px">
+    <div class="modal-title" id="cal-modal-title"></div>
+    <div id="cal-modal-body"></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeMod('cal-modal')">關閉</button></div>
+  </div>
+</div>
 
-const COLUMNS = [
-  { id: 'prepare',  label: '準備提案',  color: '#7A8AAA', dot: '#B0BCD4' },
-  { id: 'proposal', label: '提案中',    color: '#2C6EE8', dot: '#2C6EE8' },
-  { id: 'waiting',  label: '等待回覆',  color: '#D4860A', dot: '#D4860A' },
-  { id: 'closing',  label: '收尾簽約',  color: '#18A96B', dot: '#18A96B' },
-  { id: 'done',     label: '完成',      color: '#6B4FC8', dot: '#6B4FC8' },
+<!-- 流程管理 Modal -->
+<div class="modal-bg" id="col-mgr-modal">
+  <div class="modal">
+    <div class="modal-title">⚙ 流程欄位管理</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">可新增、改名、調整順序或刪除看板欄位。刪除前須先移動或刪除欄內案件。</p>
+    <div id="col-mgr-list"></div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:10px;border-style:dashed" onclick="addColRow()">＋ 新增欄位</button>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeMod('col-mgr-modal')">取消</button>
+      <button class="btn btn-primary" onclick="saveColumns()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// 預設資料
+// ─────────────────────────────────────────────
+const DEFAULT_COLS = [
+  { id:'prepare',  label:'準備提案', color:'#B0BCD4' },
+  { id:'proposal', label:'提案中',   color:'#2C6EE8' },
+  { id:'waiting',  label:'等待回覆', color:'#D4860A' },
+  { id:'closing',  label:'收尾簽約', color:'#18A96B' },
+  { id:'done',     label:'完成',     color:'#6B4FC8' },
 ];
 
 const GRADE_COLORS = {
-  'A':  { bg: '#F3F0FF', color: '#6B4FC8' },
-  'A-': { bg: '#EEF4FF', color: '#2C6EE8' },
-  'B+': { bg: '#EEF4FF', color: '#1A5CD4' },
-  'B':  { bg: '#EEF9FF', color: '#0E7CB5' },
-  'B-': { bg: '#F0F4F8', color: '#7A8AAA' },
-  'C':  { bg: '#EDFAF3', color: '#18A96B' },
-  'D':  { bg: '#FFF8EC', color: '#D4860A' },
+  'A':  { bg:'#F3F0FF', color:'#6B4FC8' },
+  'A-': { bg:'#EEF4FF', color:'#2C6EE8' },
+  'B+': { bg:'#EEF4FF', color:'#1A5CD4' },
+  'B':  { bg:'#EEF9FF', color:'#0E7CB5' },
+  'B-': { bg:'#F0F4F8', color:'#7A8AAA' },
+  'C':  { bg:'#EDFAF3', color:'#18A96B' },
+  'D':  { bg:'#FFF8EC', color:'#D4860A' },
 };
 
-// 預設示範資料
-const DEFAULT_CASES = [{"id": "c429", "status": "waiting", "company": "臺大兒童醫院", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "50-100人", "checklist": [{"id": "ck429a", "text": "確認客戶需求", "done": true}, {"id": "ck429b", "text": "寄出提案簡報", "done": true}, {"id": "ck429c", "text": "跟進客戶回覆", "done": false}], "note": "[05/25] [LINE] 已加入官方LINE\n[06/03] [LINE] 已加入官方LINE\n[06/03] 5/25 提案內容：\n50人課程-團隊大富翁95000元，並附上場地選擇，經電話聯繫後，課程改為拼畫、人數不變、課程費用不變。\n5/26 電話紀錄：\n1. 課程/活動含稅，並預估人數上升至70人、至多100人時每人費用\n2. 提供場地＆餐食於人數提升至70人時的確切配套\n3. 拼畫最終成果呈現內容、大團隊暖身活動內容\n5/27 加入代辦：遊覽車＠9000未稅、西密道導覽@200、餐盒@140元\n5/27-6/2 瘋狂改報價單項目、參與人數、餐費超過140元以上的挪移＆代辦費與稅內", "nextAction": ""}, {"id": "c430", "status": "waiting", "company": "建準電機", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "200人", "checklist": [{"id": "ck430a", "text": "確認客戶需求", "done": true}, {"id": "ck430b", "text": "寄出提案簡報", "done": true}, {"id": "ck430c", "text": "跟進客戶回覆", "done": false}], "note": "[06/03] [LINE] 尚未加入官方LINE", "nextAction": ""}, {"id": "c440", "status": "proposal", "company": "台灣默克股份有限公司", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "84人", "checklist": [{"id": "ck440a", "text": "確認客戶需求", "done": true}, {"id": "ck440b", "text": "準備提案簡報", "done": false}, {"id": "ck440c", "text": "寄出提案", "done": false}], "note": "", "nextAction": ""}, {"id": "c456", "status": "prepare", "company": "德誼數位科技股份有限公司", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "90人", "checklist": [], "note": "", "nextAction": ""}, {"id": "c463", "status": "proposal", "company": "大瓏企業股份有限公司", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "60人", "checklist": [{"id": "ck463a", "text": "確認客戶需求", "done": true}, {"id": "ck463b", "text": "準備提案簡報", "done": false}, {"id": "ck463c", "text": "寄出提案", "done": false}], "note": "[06/08] 需要一個公司簡介、企業案例分享、一個量身訂作等三個章節的簡報，偏好週五六辦理，週五上午至少要有2小時課程，不能只有移動然後就吃飯，有詢問夜間是否有活動，整體需求是1.5天、要有學習收斂、需要激勵團隊並能感染正向氣息", "nextAction": ""}, {"id": "c467", "status": "proposal", "company": "群悅科技股份有限公司", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "20人", "checklist": [{"id": "ck467a", "text": "確認客戶需求", "done": true}, {"id": "ck467b", "text": "準備提案簡報", "done": false}, {"id": "ck467c", "text": "寄出提案", "done": false}], "note": "[06/09] 6/8 電話聯繫需要能有含場地費用每人2000的課程，擬提案打造one team\n[LINE] 尚未加入官方LINE", "nextAction": ""}, {"id": "c470", "status": "waiting", "company": "金龍永盛旅行社台南分公司", "activity": "黃金比例運動會", "grade": "", "date": "", "quote": "135000未稅", "headcount": "110人", "checklist": [{"id": "ck470a", "text": "確認客戶需求", "done": true}, {"id": "ck470b", "text": "寄出提案簡報", "done": true}, {"id": "ck470c", "text": "跟進客戶回覆", "done": false}], "note": "[06/09] 6/8 承辦休假；6/9提供提案簡報、待電聯追蹤\n[LINE] 已加入官方LINE", "nextAction": ""}, {"id": "c475", "status": "closing", "company": "迪卡儂", "activity": "黃金比例運動會", "grade": "", "date": "", "quote": "120000未稅", "headcount": "110人", "checklist": [{"id": "ck475a", "text": "確認客戶需求", "done": true}, {"id": "ck475b", "text": "寄出提案簡報", "done": true}, {"id": "ck475c", "text": "跟進客戶回覆", "done": false}], "note": "[06/09] [LINE] 已加入官方LINE\n[06/10] [LINE] 已加入官方LINE", "nextAction": ""}, {"id": "c484", "status": "prepare", "company": "台灣基恩斯股份有限公司", "activity": "", "grade": "", "date": "", "quote": "未定", "headcount": "200人", "checklist": [], "note": "", "nextAction": ""}];
+const DEFAULT_CASES = [{"id":"c429","status":"waiting","company":"臺大兒童醫院","activity":"","grade":"","date":"","quote":"未定","headcount":"50-100人","checklist":[{"id":"ck429a","text":"確認客戶需求","done":true},{"id":"ck429b","text":"寄出提案簡報","done":true},{"id":"ck429c","text":"跟進客戶回覆","done":false}],"note":"[05/25] [LINE] 已加入官方LINE\n[06/03] 5/25 提案內容：50人課程-團隊大富翁95000元，並附上場地選擇，經電話聯繫後，課程改為拼畫、人數不變、課程費用不變。\n5/26 電話紀錄：1.課程/活動含稅，並預估人數上升至70人、至多100人時每人費用 2.提供場地＆餐食於人數提升至70人時的確切配套 3.拼畫最終成果呈現內容、大團隊暖身活動內容","nextAction":""},{"id":"c430","status":"waiting","company":"建準電機","activity":"","grade":"","date":"","quote":"未定","headcount":"200人","checklist":[{"id":"ck430a","text":"確認客戶需求","done":true},{"id":"ck430b","text":"寄出提案簡報","done":true},{"id":"ck430c","text":"跟進客戶回覆","done":false}],"note":"[06/03] [LINE] 尚未加入官方LINE","nextAction":""},{"id":"c440","status":"proposal","company":"台灣默克股份有限公司","activity":"","grade":"","date":"","quote":"未定","headcount":"84人","checklist":[{"id":"ck440a","text":"確認客戶需求","done":true},{"id":"ck440b","text":"準備提案簡報","done":false},{"id":"ck440c","text":"寄出提案","done":false}],"note":"","nextAction":""},{"id":"c456","status":"prepare","company":"德誼數位科技股份有限公司","activity":"","grade":"","date":"","quote":"未定","headcount":"90人","checklist":[],"note":"","nextAction":""},{"id":"c463","status":"proposal","company":"大瓏企業股份有限公司","activity":"","grade":"","date":"","quote":"未定","headcount":"60人","checklist":[{"id":"ck463a","text":"確認客戶需求","done":true},{"id":"ck463b","text":"準備提案簡報","done":false},{"id":"ck463c","text":"寄出提案","done":false}],"note":"[06/08] 需要一個公司簡介、企業案例分享、一個量身訂作等三個章節的簡報，偏好週五六辦理，週五上午至少要有2小時課程，有詢問夜間是否有活動，整體需求是1.5天、要有學習收斂、需要激勵團隊並能感染正向氣息","nextAction":""},{"id":"c467","status":"proposal","company":"群悅科技股份有限公司","activity":"","grade":"","date":"","quote":"未定","headcount":"20人","checklist":[{"id":"ck467a","text":"確認客戶需求","done":true},{"id":"ck467b","text":"準備提案簡報","done":false},{"id":"ck467c","text":"寄出提案","done":false}],"note":"[06/09] 6/8電話聯繫需要能有含場地費用每人2000的課程，擬提案打造one team\n[LINE] 尚未加入官方LINE","nextAction":""},{"id":"c470","status":"waiting","company":"金龍永盛旅行社台南分公司","activity":"黃金比例運動會","grade":"","date":"","quote":"135000未稅","headcount":"110人","checklist":[{"id":"ck470a","text":"確認客戶需求","done":true},{"id":"ck470b","text":"寄出提案簡報","done":true},{"id":"ck470c","text":"跟進客戶回覆","done":false}],"note":"[06/09] 6/8承辦休假；6/9提供提案簡報、待電聯追蹤\n[LINE] 已加入官方LINE","nextAction":""},{"id":"c475","status":"closing","company":"迪卡儂","activity":"黃金比例運動會","grade":"","date":"","quote":"120000未稅","headcount":"110人","checklist":[{"id":"ck475a","text":"確認客戶需求","done":true},{"id":"ck475b","text":"寄出提案簡報","done":true},{"id":"ck475c","text":"跟進客戶回覆","done":false}],"note":"[06/09] [LINE] 已加入官方LINE\n[06/10] [LINE] 已加入官方LINE","nextAction":""},{"id":"c484","status":"prepare","company":"台灣基恩斯股份有限公司","activity":"","grade":"","date":"","quote":"未定","headcount":"200人","checklist":[],"note":"","nextAction":""}];
 
-const DEFAULT_NOTES = [];
+// ─────────────────────────────────────────────
+// 狀態
+// ─────────────────────────────────────────────
+function load(key, def) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; } }
 
-// ══════════════════════════════════════════════
-// 狀態管理
-// ══════════════════════════════════════════════
+let COLS   = load('kb_cols',    DEFAULT_COLS);
+let cases  = load('kb_cases',   DEFAULT_CASES);
+let notes  = load('kb_notes',   []);
+let hlog   = load('kb_history', []);
 
-let cases, notes;
-try {
-  const savedCases = localStorage.getItem('kanban_cases');
-  cases = savedCases ? JSON.parse(savedCases) : DEFAULT_CASES;
-} catch(e) { cases = DEFAULT_CASES; }
-try {
-  const savedNotes = localStorage.getItem('kanban_notes');
-  notes = savedNotes ? JSON.parse(savedNotes) : DEFAULT_NOTES;
-} catch(e) { notes = DEFAULT_NOTES; }
-let currentCaseId = null;
+let currentId = null;
+let gradeFilter = '';
+let hFilter = 'all';
+let calY, calM;
+const _now = new Date();
+calY = _now.getFullYear(); calM = _now.getMonth();
 
 function save() {
-  localStorage.setItem('kanban_cases', JSON.stringify(cases));
-  localStorage.setItem('kanban_notes', JSON.stringify(notes));
+  localStorage.setItem('kb_cols',    JSON.stringify(COLS));
+  localStorage.setItem('kb_cases',   JSON.stringify(cases));
+  localStorage.setItem('kb_notes',   JSON.stringify(notes));
+  localStorage.setItem('kb_history', JSON.stringify(hlog));
 }
 
-// ══════════════════════════════════════════════
-// 看板渲染
-// ══════════════════════════════════════════════
+function logH(type, company, detail, caseId) {
+  hlog.unshift({ id:'h'+Date.now(), time:new Date().toISOString(), type, company, detail, caseId: caseId||null });
+  if (hlog.length > 400) hlog = hlog.slice(0,400);
+}
 
+// ─────────────────────────────────────────────
+// 工具
+// ─────────────────────────────────────────────
+function weekNum(d) {
+  const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = dt.getUTCDay() || 7;
+  dt.setUTCDate(dt.getUTCDate() + 4 - day);
+  const y1 = new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+  return Math.ceil((((dt-y1)/86400000)+1)/7);
+}
+
+function fmtDate(s) { return s ? s.replace(/-/g,'/') : ''; }
+
+function dueInfo(dateStr) {
+  if (!dateStr) return { cls:'', text:'' };
+  const t = new Date(); t.setHours(0,0,0,0);
+  const d = new Date(dateStr); d.setHours(0,0,0,0);
+  const diff = Math.round((d-t)/86400000);
+  if (diff < 0) return { cls:'urgent', text:`逾期 ${-diff} 天` };
+  if (diff <= 3) return { cls:'soon', text:`${diff} 天後` };
+  return { cls:'', text: fmtDate(dateStr) };
+}
+
+function colOf(status) { return COLS.find(c=>c.id===status)||{color:'#ccc',label:status}; }
+
+function parseVal(q) {
+  if (!q || q==='未定') return 0;
+  const n = parseInt(q.replace(/[^0-9]/g,''));
+  return isNaN(n) ? 0 : n;
+}
+
+function fmtVal(v) {
+  if (!v) return '—';
+  return v >= 10000 ? (v/10000).toFixed(1)+'萬' : v.toLocaleString();
+}
+
+// ─────────────────────────────────────────────
+// Header 週次
+// ─────────────────────────────────────────────
+function updateHdrWeek() {
+  const w = weekNum(new Date());
+  document.getElementById('hdr-week').textContent = `第 ${w} 週`;
+}
+
+// ─────────────────────────────────────────────
+// 看板
+// ─────────────────────────────────────────────
 function renderKanban() {
   renderSummary();
+  const q = (document.getElementById('q').value||'').trim().toLowerCase();
   const board = document.getElementById('kanban-board');
   board.innerHTML = '';
-  COLUMNS.forEach(col => {
-    const cards = cases.filter(c => c.status === col.id);
+
+  COLS.forEach(col => {
+    let cards = cases.filter(c => c.status === col.id);
+    const total = cards.length;
+    if (q) cards = cards.filter(c => c.company.toLowerCase().includes(q) || (c.activity||'').toLowerCase().includes(q));
+    if (gradeFilter) cards = cards.filter(c => c.grade === gradeFilter);
+
     const div = document.createElement('div');
     div.className = 'column';
     div.innerHTML = `
       <div class="col-header">
-        <div class="col-title">
-          <div class="col-dot" style="background:${col.dot}"></div>
-          ${col.label}
-        </div>
-        <div class="col-count">${cards.length}</div>
+        <div class="col-title"><div class="col-dot" style="background:${col.color}"></div>${col.label}</div>
+        <div class="col-count">${total}</div>
       </div>
-      <div class="col-body" id="col-${col.id}">
-        ${cards.map(c => renderCard(c)).join('')}
-        ${cards.length === 0 ? '<div class="empty" style="padding:20px 8px;font-size:12px">暫無案件</div>' : ''}
+      <div class="col-body">
+        ${cards.map(c=>renderCard(c)).join('')}
+        ${cards.length===0?'<div class="empty" style="padding:16px 8px;font-size:12px">暫無案件</div>':''}
       </div>
-      <div class="col-add">
-        <button class="col-add-btn" onclick="openAddModal('${col.id}')">＋ 新增</button>
-      </div>
+      <div class="col-add"><button class="col-add-btn" onclick="openAddModal('${col.id}')">＋ 新增</button></div>
     `;
     board.appendChild(div);
   });
+
+  // grade chips
+  const grades = [...new Set(cases.map(c=>c.grade).filter(Boolean))].sort();
+  document.getElementById('grade-chips').innerHTML = grades.map(g => {
+    const gc = GRADE_COLORS[g]||{};
+    const on = gradeFilter===g;
+    return `<div class="chip ${on?'on':''}" style="${on?`background:${gc.color};border-color:${gc.color}`:''}" onclick="setGradeFilter('${g}')">${g}</div>`;
+  }).join('');
 }
 
+function setGradeFilter(g) { gradeFilter = gradeFilter===g?'':g; renderKanban(); }
+
 function renderCard(c) {
-  const grade = GRADE_COLORS[c.grade] || { bg: '#F0F4F8', color: '#7A8AAA' };
-  const done = c.checklist.filter(x => x.done).length;
+  const gc = GRADE_COLORS[c.grade]||{bg:'#F0F4F8',color:'#7A8AAA'};
+  const done = c.checklist.filter(x=>x.done).length;
   const total = c.checklist.length;
-  const today = new Date(); today.setHours(0,0,0,0);
-  let dueClass = '', dueText = '';
-  if (c.date) {
-    const d = new Date(c.date); d.setHours(0,0,0,0);
-    const diff = Math.round((d - today) / 86400000);
-    if (diff < 0) { dueClass = 'urgent'; dueText = `逾期 ${-diff} 天`; }
-    else if (diff <= 3) { dueClass = 'soon'; dueText = `${diff} 天後`; }
-    else { dueText = c.date.replace(/-/g, '/'); }
-  }
+  const due = dueInfo(c.date);
   return `
     <div class="card" onclick="openPanel('${c.id}')">
-      ${c.grade ? `<div class="card-grade" style="background:${grade.bg};color:${grade.color}">${c.grade}</div>` : ''}
+      ${c.grade?`<div class="card-grade" style="background:${gc.bg};color:${gc.color}">${c.grade}</div>`:''}
       <div class="card-company">${c.company}</div>
-      ${c.activity ? `<div class="card-activity">🎯 ${c.activity}</div>` : ''}
+      ${c.activity?`<div class="card-activity">🎯 ${c.activity}</div>`:''}
       <div class="card-meta">
-        ${c.headcount ? `<div class="meta-chip">👥 ${c.headcount}</div>` : ''}
-        ${c.quote && c.quote !== '未定' ? `<div class="meta-chip">💰 ${c.quote}</div>` : ''}
+        ${c.headcount?`<div class="meta-chip">👥 ${c.headcount}</div>`:''}
+        ${c.quote&&c.quote!=='未定'?`<div class="meta-chip">💰 ${c.quote}</div>`:''}
       </div>
-      ${total > 0 ? `
-        <div style="margin-top:8px">
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-size:10px;color:var(--muted)">待辦進度</span>
+      ${total>0?`
+        <div style="margin-top:7px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="font-size:10px;color:var(--muted)">待辦</span>
             <span style="font-size:10px;color:var(--muted)">${done}/${total}</span>
           </div>
           <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
-            <div style="height:100%;width:${total ? (done/total*100) : 0}%;background:var(--blue);border-radius:2px;transition:width .3s"></div>
+            <div style="height:100%;width:${total?(done/total*100):0}%;background:var(--blue);border-radius:2px"></div>
           </div>
-        </div>
-      ` : ''}
+        </div>`:''}
       <div class="card-footer">
-        ${dueText ? `<div class="card-due ${dueClass}">📅 ${dueText}</div>` : '<div></div>'}
-        ${c.nextAction ? `<div style="font-size:10px;color:var(--blue)">→ ${c.nextAction.slice(0,12)}</div>` : ''}
+        ${due.text?`<div class="card-due ${due.cls}">📅 ${due.text}</div>`:'<div></div>'}
+        ${c.nextAction?`<div style="font-size:10px;color:var(--blue)">→ ${c.nextAction.slice(0,14)}</div>`:''}
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
 function renderSummary() {
-  const total = cases.length;
-  const active = cases.filter(c => !['done'].includes(c.status)).length;
-  const urgent = cases.filter(c => {
-    if (!c.date) return false;
-    const d = new Date(c.date); d.setHours(0,0,0,0);
-    const today = new Date(); today.setHours(0,0,0,0);
-    return (d - today) / 86400000 <= 3;
-  }).length;
-  const done = cases.filter(c => c.status === 'done').length;
+  const active = cases.filter(c=>c.status!=='done').length;
+  const urgent = cases.filter(c=>{ if(!c.date)return false; const d=new Date(c.date),t=new Date(); t.setHours(0,0,0,0); return (d-t)/86400000<=3; }).length;
+  const done = cases.filter(c=>c.status==='done').length;
+  const tv = cases.reduce((s,c)=>s+parseVal(c.quote),0);
   document.getElementById('summary-row').innerHTML = `
-    <div class="sum-card">
-      <div class="sum-num">${total}</div>
-      <div class="sum-label">手上案件</div>
-    </div>
-    <div class="sum-card">
-      <div class="sum-num" style="color:var(--blue)">${active}</div>
-      <div class="sum-label">進行中</div>
-    </div>
-    <div class="sum-card">
-      <div class="sum-num" style="color:var(--red)">${urgent}</div>
-      <div class="sum-label">即將截止</div>
-    </div>
-    <div class="sum-card">
-      <div class="sum-num" style="color:var(--green)">${done}</div>
-      <div class="sum-label">已完成</div>
-    </div>
+    <div class="sum-card"><div class="sum-num">${cases.length}</div><div class="sum-label">手上案件</div></div>
+    <div class="sum-card"><div class="sum-num" style="color:var(--blue)">${active}</div><div class="sum-label">進行中</div></div>
+    <div class="sum-card"><div class="sum-num" style="color:var(--red)">${urgent}</div><div class="sum-label">即將截止</div></div>
+    <div class="sum-card"><div class="sum-num" style="color:var(--green)">${done}</div><div class="sum-label">已完成</div></div>
+    <div class="sum-card"><div class="sum-num" style="color:var(--amber);font-size:20px">${fmtVal(tv)}</div><div class="sum-label">報價總額</div></div>
   `;
 }
 
-// ══════════════════════════════════════════════
-// 詳情側欄
-// ══════════════════════════════════════════════
+// ─────────────────────────────────────────────
+// 流程分析
+// ─────────────────────────────────────────────
+function renderPipeline() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const maxCount = Math.max(...COLS.map(col=>cases.filter(c=>c.status===col.id).length),1);
 
+  let html = `<div class="section-hd">案件漏斗</div><div class="funnel">`;
+  COLS.forEach((col,i) => {
+    const cc = cases.filter(c=>c.status===col.id);
+    const val = cc.reduce((s,c)=>s+parseVal(c.quote),0);
+    const barW = Math.round(cc.length/maxCount*100);
+    if(i>0) html+=`<div class="funnel-arrow">›</div>`;
+    html+=`<div class="funnel-stage"><div class="funnel-inner">
+      <div class="funnel-dot" style="background:${col.color}"></div>
+      <div class="funnel-label">${col.label}</div>
+      <div class="funnel-count" style="color:${col.color}">${cc.length}</div>
+      <div class="funnel-val">${fmtVal(val)}</div>
+      <div class="funnel-bar"><div class="funnel-fill" style="width:${barW}%;background:${col.color}"></div></div>
+      <div class="funnel-cases">
+        ${cc.slice(0,4).map(c=>`<div class="funnel-chip" style="background:${col.color}18;color:${col.color}" onclick="openPanel('${c.id}')">${c.company.slice(0,10)}</div>`).join('')}
+        ${cc.length>4?`<div class="cal-more">+${cc.length-4} 更多</div>`:''}
+      </div>
+    </div></div>`;
+  });
+  html+=`</div>`;
+
+  // 需追蹤（等待回覆且無下一步）
+  const needsFU = cases.filter(c=>c.status==='waiting'&&!c.nextAction);
+  // 近14天執行
+  const upcoming = cases.filter(c=>{
+    if(!c.date)return false;
+    const diff=(new Date(c.date)-today)/86400000;
+    return diff>=0&&diff<=14;
+  }).sort((a,b)=>a.date.localeCompare(b.date));
+  // 分級分布
+  const gMap={};
+  cases.forEach(c=>{ if(!c.grade)return; if(!gMap[c.grade])gMap[c.grade]=0; gMap[c.grade]++; });
+
+  html+=`<div class="insight-grid">
+    <div class="insight-card">
+      <div class="insight-title">📊 分級分布</div>
+      ${Object.entries(gMap).sort((a,b)=>b[1]-a[1]).map(([g,n])=>{
+        const gc=GRADE_COLORS[g]||{bg:'#eee',color:'#666'};
+        return `<div class="insight-row"><span><span class="tag" style="background:${gc.bg};color:${gc.color}">${g}</span></span><span style="font-weight:600">${n} 件</span></div>`;
+      }).join('')||'<div style="font-size:12px;color:var(--muted);padding:8px 0">尚無分級資料</div>'}
+    </div>
+    <div class="insight-card">
+      <div class="insight-title">⚠️ 等待回覆需追蹤</div>
+      ${needsFU.length===0
+        ?'<div style="font-size:12px;color:var(--green);padding:6px 0">✓ 所有等待案件都已有下一步</div>'
+        :needsFU.map(c=>`<div class="insight-row" onclick="openPanel('${c.id}')"><span>${c.company}</span><span style="font-size:10px;color:var(--amber)">無下一步</span></div>`).join('')}
+    </div>
+    <div class="insight-card">
+      <div class="insight-title">📅 近 14 天執行</div>
+      ${upcoming.length===0
+        ?'<div style="font-size:12px;color:var(--muted);padding:6px 0">近 14 天無排程</div>'
+        :upcoming.map(c=>{
+          const diff=Math.round((new Date(c.date)-today)/86400000);
+          const label=diff===0?'今天':diff===1?'明天':`${diff}天後`;
+          return `<div class="insight-row" onclick="openPanel('${c.id}')"><span>${c.company.slice(0,12)}</span><span style="color:${diff<=3?'var(--red)':'var(--amber)'}">${label}</span></div>`;
+        }).join('')}
+    </div>
+  </div>`;
+  document.getElementById('pipeline-content').innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+// 行事曆
+// ─────────────────────────────────────────────
+function calMove(dir) {
+  calM+=dir;
+  if(calM>11){calM=0;calY++;}
+  if(calM<0){calM=11;calY--;}
+  renderCalendar();
+}
+function calToday() { const n=new Date(); calY=n.getFullYear(); calM=n.getMonth(); renderCalendar(); }
+
+function renderCalendar() {
+  const today=new Date(); today.setHours(0,0,0,0);
+  const todayStr=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  const MN=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  document.getElementById('cal-title').textContent=`${calY} 年 ${MN[calM]}`;
+
+  const firstDow = (new Date(calY,calM,1).getDay()||7)-1; // 0=Mon offset
+  const lastDate = new Date(calY,calM+1,0).getDate();
+
+  const cells=[];
+  for(let i=firstDow;i>0;i--) cells.push({d:new Date(calY,calM,1-i),other:true});
+  for(let i=1;i<=lastDate;i++) cells.push({d:new Date(calY,calM,i),other:false});
+  while(cells.length%7!==0) cells.push({d:new Date(calY,calM+1,cells.length-lastDate-firstDow+1),other:true});
+
+  // current week bounds
+  const todDow=(today.getDay()||7)-1;
+  const wkStart=new Date(today); wkStart.setDate(today.getDate()-todDow);
+  const wkEnd=new Date(wkStart); wkEnd.setDate(wkStart.getDate()+6);
+
+  const weeks=[];
+  for(let i=0;i<cells.length;i+=7) weeks.push(cells.slice(i,i+7));
+
+  let html='';
+  weeks.forEach(week=>{
+    const isCurWk = week.some(({d,other})=>!other&&d>=wkStart&&d<=wkEnd);
+    html+=`<div class="cal-row ${isCurWk?'cur-week':''}">`;
+    html+=`<div class="cal-wnum">W${weekNum(week[0].d)}</div>`;
+    week.forEach(({d,other},di)=>{
+      const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const ev=cases.filter(c=>c.date===ds);
+      const isT=ds===todayStr;
+      html+=`<div class="cal-cell ${other?'other':''} ${isT?'today':''} ${di===5?'sat':''} ${di===6?'sun':''}" onclick="openCalDay('${ds}')">
+        <div class="cal-dn">${d.getDate()}</div>
+        ${ev.slice(0,2).map(c=>{const col=colOf(c.status);return`<div class="cal-ev" style="background:${col.color}22;color:${col.color}" onclick="event.stopPropagation();openPanel('${c.id}')">${c.company.slice(0,8)}</div>`;}).join('')}
+        ${ev.length>2?`<div class="cal-more">+${ev.length-2}</div>`:''}
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+  document.getElementById('cal-grid').innerHTML=html;
+}
+
+function openCalDay(ds) {
+  const ev=cases.filter(c=>c.date===ds);
+  document.getElementById('cal-modal-title').textContent=fmtDate(ds)+' 的案件';
+  document.getElementById('cal-modal-body').innerHTML= ev.length===0
+    ?'<div class="empty">當天無排程案件</div>'
+    :ev.map(c=>{
+      const col=colOf(c.status);
+      return `<div class="insight-row" onclick="closeMod('cal-modal');openPanel('${c.id}')">
+        <span><strong>${c.company}</strong>${c.activity?' · '+c.activity:''}</span>
+        <span class="tag" style="background:${col.color}22;color:${col.color}">${col.label}</span>
+      </div>`;
+    }).join('');
+  document.getElementById('cal-modal').classList.add('open');
+}
+
+// ─────────────────────────────────────────────
+// 歷史紀錄
+// ─────────────────────────────────────────────
+const H_INFO={
+  add:          {icon:'＋',bg:'#EDFAF3'},
+  delete:       {icon:'✕',bg:'#FFF0F0'},
+  status_change:{icon:'→',bg:'#EEF4FF'},
+  note_add:     {icon:'📝',bg:'#FFF8EC'},
+};
+
+function setHFilter(type,el) {
+  hFilter=type;
+  document.querySelectorAll('.h-filter .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = hFilter==='all' ? hlog : hlog.filter(h=>h.type===hFilter);
+  if(list.length===0){document.getElementById('history-feed').innerHTML='<div class="empty">尚無歷史紀錄</div>';return;}
+  const groups={};
+  list.forEach(h=>{const day=h.time.slice(0,10);if(!groups[day])groups[day]=[];groups[day].push(h);});
+  let html='';
+  Object.entries(groups).sort((a,b)=>b[0].localeCompare(a[0])).forEach(([day,items])=>{
+    html+=`<div class="h-group"><div class="h-date">${day}</div>
+      ${items.map(h=>{
+        const info=H_INFO[h.type]||{icon:'●',bg:'#F0F4F8'};
+        const t=new Date(h.time).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+        return `<div class="h-item">
+          <div class="h-icon" style="background:${info.bg}">${info.icon}</div>
+          <div class="h-text"><div class="h-company">${h.company}</div><div class="h-detail">${h.detail}</div></div>
+          <div class="h-time">${t}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  });
+  document.getElementById('history-feed').innerHTML=html;
+}
+
+function clearHistory(){if(!confirm('確定清除所有歷史紀錄？'))return;hlog=[];save();renderHistory();}
+
+// ─────────────────────────────────────────────
+// 側欄
+// ─────────────────────────────────────────────
 function openPanel(id) {
-  currentCaseId = id;
-  const c = cases.find(x => x.id === id);
-  if (!c) return;
-  document.getElementById('panel-title').textContent = c.company;
-  const grade = GRADE_COLORS[c.grade] || { bg: '#F0F4F8', color: '#7A8AAA' };
-  document.getElementById('panel-body').innerHTML = `
+  currentId=id;
+  const c=cases.find(x=>x.id===id);
+  if(!c)return;
+  document.getElementById('panel-title').textContent=c.company;
+  document.getElementById('panel-body').innerHTML=`
     <div class="field-group">
       <div class="field-label">進度狀態</div>
       <select onchange="updateCase('${id}','status',this.value)">
-        ${COLUMNS.map(col => `<option value="${col.id}" ${c.status===col.id?'selected':''}>${col.label}</option>`).join('')}
+        ${COLS.map(col=>`<option value="${col.id}" ${c.status===col.id?'selected':''}>${col.label}</option>`).join('')}
       </select>
     </div>
     <div class="field-group">
       <div class="field-label">案件分級</div>
       <select onchange="updateCase('${id}','grade',this.value)">
         <option value="">— 選擇分級 —</option>
-        ${['A','A-','B+','B','B-','C','D'].map(g => `<option value="${g}" ${c.grade===g?'selected':''}>${g}</option>`).join('')}
+        ${['A','A-','B+','B','B-','C','D'].map(g=>`<option value="${g}" ${c.grade===g?'selected':''}>${g}</option>`).join('')}
       </select>
     </div>
-    <div class="field-group">
-      <div class="field-label">提案活動</div>
+    <div class="field-group"><div class="field-label">提案活動</div>
       <input type="text" value="${c.activity||''}" onchange="updateCase('${id}','activity',this.value)" placeholder="例：王者天下">
     </div>
-    <div class="field-group">
-      <div class="field-label">預計執行日期</div>
+    <div class="field-group"><div class="field-label">預計執行日期</div>
       <input type="date" value="${c.date||''}" onchange="updateCase('${id}','date',this.value)">
     </div>
-    <div class="field-group">
-      <div class="field-label">報價</div>
+    <div class="field-group"><div class="field-label">報價</div>
       <input type="text" value="${c.quote||''}" onchange="updateCase('${id}','quote',this.value)" placeholder="例：120,000">
     </div>
-    <div class="field-group">
-      <div class="field-label">人數</div>
+    <div class="field-group"><div class="field-label">人數</div>
       <input type="text" value="${c.headcount||''}" onchange="updateCase('${id}','headcount',this.value)" placeholder="例：50人">
     </div>
     <div class="divider"></div>
-    <div class="field-group">
-      <div class="field-label">下一步行動</div>
+    <div class="field-group"><div class="field-label">下一步行動</div>
       <input type="text" value="${c.nextAction||''}" onchange="updateCase('${id}','nextAction',this.value)" placeholder="例：週五前寄提案">
     </div>
     <div class="field-group">
       <div class="field-label">提案 Checklist</div>
-      <div class="checklist-editor" id="checklist-editor">
-        ${renderChecklistEditor(c)}
-      </div>
-      <button class="add-item-btn" onclick="addChecklistItem('${id}')">＋ 新增項目</button>
+      <div id="ck-editor">${renderCkEditor(c)}</div>
+      <button class="add-item-btn" onclick="addCkItem('${id}')">＋ 新增項目</button>
     </div>
-    <div class="field-group">
-      <div class="field-label">客戶重點 / 備註</div>
-      <textarea onchange="updateCase('${id}','note',this.value)" rows="5" placeholder="客戶說過的重要需求、偏好、注意事項...">${c.note||''}</textarea>
+    <div class="field-group"><div class="field-label">客戶重點 / 備註</div>
+      <textarea onchange="updateCase('${id}','note',this.value)" rows="6" placeholder="客戶說過的重要需求、偏好、注意事項…">${c.note||''}</textarea>
     </div>
     <div class="divider"></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-ghost" style="flex:1;color:var(--red);border-color:var(--red)" onclick="deleteCase('${id}')">刪除案件</button>
-    </div>
+    <button class="btn btn-ghost" style="width:100%;color:var(--red);border-color:var(--red)" onclick="deleteCase('${id}')">刪除案件</button>
   `;
   document.getElementById('panel-overlay').classList.add('open');
 }
 
-function renderChecklistEditor(c) {
-  return (c.checklist || []).map(item => `
-    <div class="checklist-item-row" id="ckrow-${item.id}">
-      <input type="checkbox" ${item.done?'checked':''} onchange="toggleCheck('${c.id}','${item.id}',this.checked)">
-      <input type="text" value="${item.text}" onchange="updateCheck('${c.id}','${item.id}',this.value)">
-      <button class="del-btn" onclick="deleteCheck('${c.id}','${item.id}')">×</button>
-    </div>
-  `).join('');
+function renderCkEditor(c) {
+  return (c.checklist||[]).map(item=>`
+    <div class="checklist-item-row" id="ckr-${item.id}">
+      <input type="checkbox" ${item.done?'checked':''} onchange="toggleCk('${c.id}','${item.id}',this.checked)">
+      <input type="text" value="${item.text}" onchange="updateCk('${c.id}','${item.id}',this.value)">
+      <button class="del-btn" onclick="deleteCk('${c.id}','${item.id}')">×</button>
+    </div>`).join('');
 }
 
-function closePanel(e) {
-  if (e && e.target !== document.getElementById('panel-overlay')) return;
-  document.getElementById('panel-overlay').classList.remove('open');
-  currentCaseId = null;
-  renderKanban();
-}
+function closePanelBg(e){if(e.target===document.getElementById('panel-overlay'))closePanel();}
+function closePanel(){document.getElementById('panel-overlay').classList.remove('open');currentId=null;renderKanban();}
 
-// ══════════════════════════════════════════════
-// 資料操作
-// ══════════════════════════════════════════════
-
-function updateCase(id, field, value) {
-  const c = cases.find(x => x.id === id);
-  if (c) { c[field] = value; save(); }
-}
-
-function toggleCheck(caseId, itemId, done) {
-  const c = cases.find(x => x.id === caseId);
-  if (!c) return;
-  const item = c.checklist.find(x => x.id === itemId);
-  if (item) { item.done = done; save(); }
-}
-
-function updateCheck(caseId, itemId, text) {
-  const c = cases.find(x => x.id === caseId);
-  if (!c) return;
-  const item = c.checklist.find(x => x.id === itemId);
-  if (item) { item.text = text; save(); }
-}
-
-function deleteCheck(caseId, itemId) {
-  const c = cases.find(x => x.id === caseId);
-  if (!c) return;
-  c.checklist = c.checklist.filter(x => x.id !== itemId);
+// ─────────────────────────────────────────────
+// CRUD
+// ─────────────────────────────────────────────
+function updateCase(id,field,val){
+  const c=cases.find(x=>x.id===id); if(!c)return;
+  const old=c[field]; c[field]=val;
+  if(field==='status'&&old!==val){
+    const fl=colOf(old).label, tl=colOf(val).label;
+    logH('status_change',c.company,`${fl} → ${tl}`,id);
+  }
   save();
-  document.getElementById('checklist-editor').innerHTML = renderChecklistEditor(c);
 }
 
-function addChecklistItem(caseId) {
-  const c = cases.find(x => x.id === caseId);
-  if (!c) return;
-  const newItem = { id: 'ck' + Date.now(), text: '', done: false };
-  c.checklist.push(newItem);
-  save();
-  document.getElementById('checklist-editor').innerHTML = renderChecklistEditor(c);
+function toggleCk(cid,iid,done){const c=cases.find(x=>x.id===cid);if(!c)return;const it=c.checklist.find(x=>x.id===iid);if(it){it.done=done;save();}}
+function updateCk(cid,iid,text){const c=cases.find(x=>x.id===cid);if(!c)return;const it=c.checklist.find(x=>x.id===iid);if(it){it.text=text;save();}}
+function deleteCk(cid,iid){const c=cases.find(x=>x.id===cid);if(!c)return;c.checklist=c.checklist.filter(x=>x.id!==iid);save();document.getElementById('ck-editor').innerHTML=renderCkEditor(c);}
+function addCkItem(cid){const c=cases.find(x=>x.id===cid);if(!c)return;c.checklist.push({id:'ck'+Date.now(),text:'',done:false});save();document.getElementById('ck-editor').innerHTML=renderCkEditor(c);}
+
+function deleteCase(id){
+  if(!confirm('確定刪除這個案件？'))return;
+  const c=cases.find(x=>x.id===id);
+  if(c)logH('delete',c.company,'案件已刪除',id);
+  cases=cases.filter(x=>x.id!==id);
+  save(); closePanel();
 }
 
-function deleteCase(id) {
-  if (!confirm('確定刪除這個案件？')) return;
-  cases = cases.filter(x => x.id !== id);
-  save();
-  document.getElementById('panel-overlay').classList.remove('open');
-  renderKanban();
-}
+// ─────────────────────────────────────────────
+// 新增案件 Modal
+// ─────────────────────────────────────────────
+let _addStatus='';
 
-// ══════════════════════════════════════════════
-// 新增案件
-// ══════════════════════════════════════════════
-
-let addModalStatus = 'prepare';
-
-function openAddModal(status) {
-  addModalStatus = status || 'prepare';
+function openAddModal(status){
+  _addStatus=status||COLS[0]?.id||'';
+  // populate status select
+  const sel=document.getElementById('nc-status');
+  sel.innerHTML=COLS.map(col=>`<option value="${col.id}" ${col.id===_addStatus?'selected':''}>${col.label}</option>`).join('');
   document.getElementById('add-modal').classList.add('open');
-  document.getElementById('new-company').focus();
+  setTimeout(()=>document.getElementById('nc-company').focus(),50);
 }
 
-function closeAddModal() {
+function closeAddModal(){
   document.getElementById('add-modal').classList.remove('open');
-  ['new-company','new-activity','new-quote','new-headcount'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('new-grade').value = '';
-  document.getElementById('new-date').value = '';
+  ['nc-company','nc-activity','nc-quote','nc-headcount'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nc-grade').value='';
+  document.getElementById('nc-date').value='';
 }
 
-function addCase() {
-  const company = document.getElementById('new-company').value.trim();
-  if (!company) { alert('請輸入公司名稱'); return; }
-  const c = {
-    id: 'c' + Date.now(),
-    status: addModalStatus,
-    company,
-    activity: document.getElementById('new-activity').value.trim(),
-    grade: document.getElementById('new-grade').value,
-    date: document.getElementById('new-date').value,
-    quote: document.getElementById('new-quote').value.trim() || '未定',
-    headcount: document.getElementById('new-headcount').value.trim() || '未定',
-    checklist: [],
-    note: '',
-    nextAction: '',
+function addCase(){
+  const company=document.getElementById('nc-company').value.trim();
+  if(!company){alert('請輸入公司名稱');return;}
+  const status=document.getElementById('nc-status').value||_addStatus;
+  const c={
+    id:'c'+Date.now(), status, company,
+    activity:document.getElementById('nc-activity').value.trim(),
+    grade:document.getElementById('nc-grade').value,
+    date:document.getElementById('nc-date').value,
+    quote:document.getElementById('nc-quote').value.trim()||'未定',
+    headcount:document.getElementById('nc-headcount').value.trim()||'未定',
+    checklist:[], note:'', nextAction:'',
   };
   cases.push(c);
-  save();
-  closeAddModal();
-  renderKanban();
+  logH('add',company,`新增至「${colOf(status).label}」`,c.id);
+  save(); closeAddModal(); renderKanban();
 }
 
-// ══════════════════════════════════════════════
-// 本週待辦
-// ══════════════════════════════════════════════
-
-function renderWeek() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const dow = today.getDay();
-  const monday = new Date(today); monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
-  const DAYS = ['一','二','三','四','五'];
-  const grid = document.getElementById('week-grid');
-  grid.innerHTML = '';
-  for (let i = 0; i < 5; i++) {
-    const d = new Date(monday); d.setDate(monday.getDate() + i);
-    const isToday = d.getTime() === today.getTime();
-    const dateStr = d.toISOString().slice(0, 10);
-    const dayCases = cases.filter(c => c.date === dateStr);
-    const col = document.createElement('div');
-    col.className = 'day-col';
-    col.innerHTML = `
-      <div class="day-header">
-        <div class="day-name">週${DAYS[i]}</div>
-        <div class="day-date ${isToday ? "today" : ""}">${d.getMonth()+1}/${d.getDate()}</div>
-      </div>
-      <div class="day-body">
-        ${dayCases.map(c => {
-          const col2 = COLUMNS.find(x => x.id === c.status);
-          return `<div class="day-task" style="background:${col2?.dot||'#eee'}20;border-color:${col2?.dot||'#eee'}" onclick="openPanel('${c.id}')">
-            <div style="font-size:12px;font-weight:600">${c.company.slice(0,12)}</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:2px">${c.activity||'—'}</div>
-          </div>`;
-        }).join('')}
-        ${dayCases.length === 0 ? '<div style="font-size:11px;color:var(--dim);padding:8px 0">無排程</div>' : ''}
-      </div>
-    `;
-    grid.appendChild(col);
-  }
-}
-
-// ══════════════════════════════════════════════
+// ─────────────────────────────────────────────
 // 客戶筆記
-// ══════════════════════════════════════════════
-
-function renderNotes() {
-  const grid = document.getElementById('note-grid');
-  if (notes.length === 0) {
-    grid.innerHTML = '<div class="empty">還沒有客戶筆記，點「新增筆記」開始記錄</div>';
-    return;
-  }
-  grid.innerHTML = notes.map(n => `
-    <div class="note-card" onclick="openNoteDetail('${n.id}')">
+// ─────────────────────────────────────────────
+function renderNotes(){
+  const grid=document.getElementById('note-grid');
+  if(!notes.length){grid.innerHTML='<div class="empty">還沒有客戶筆記，點「新增筆記」開始記錄</div>';return;}
+  grid.innerHTML=notes.map(n=>`
+    <div class="note-card" onclick="openNotePanel('${n.id}')">
       <div class="note-company">${n.company}</div>
       <div class="note-date">${n.date}</div>
       <div class="note-content">${n.content.slice(0,120)}${n.content.length>120?'…':''}</div>
-      ${n.tags?.length ? `<div class="note-tags">${n.tags.map(t=>`<span class="tag" style="background:var(--blue-light);color:var(--blue)">${t}</span>`).join('')}</div>` : ''}
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-function openNoteModal() {
-  document.getElementById('note-modal').classList.add('open');
-  document.getElementById('note-company').focus();
+function openNoteModal(){document.getElementById('note-modal').classList.add('open');setTimeout(()=>document.getElementById('nn-company').focus(),50);}
+function closeNoteModal(){document.getElementById('note-modal').classList.remove('open');document.getElementById('nn-company').value='';document.getElementById('nn-content').value='';}
+
+function addNote(){
+  const company=document.getElementById('nn-company').value.trim();
+  if(!company){alert('請輸入客戶名稱');return;}
+  const n={id:'n'+Date.now(),company,date:new Date().toISOString().slice(0,10),content:document.getElementById('nn-content').value.trim(),tags:[]};
+  notes.unshift(n);
+  logH('note_add',company,'新增客戶筆記');
+  save(); closeNoteModal(); renderNotes();
 }
 
-function closeNoteModal() {
-  document.getElementById('note-modal').classList.remove('open');
-  document.getElementById('note-company').value = '';
-  document.getElementById('note-content').value = '';
-}
-
-function addNote() {
-  const company = document.getElementById('note-company').value.trim();
-  const content = document.getElementById('note-content').value.trim();
-  if (!company) { alert('請輸入客戶名稱'); return; }
-  notes.unshift({
-    id: 'n' + Date.now(),
-    company,
-    date: new Date().toISOString().slice(0,10),
-    content,
-    tags: [],
-  });
-  save();
-  closeNoteModal();
-  renderNotes();
-}
-
-function openNoteDetail(id) {
-  const n = notes.find(x => x.id === id);
-  if (!n) return;
-  document.getElementById('panel-title').textContent = n.company + ' — 筆記';
-  document.getElementById('panel-body').innerHTML = `
-    <div class="field-group">
-      <div class="field-label">客戶名稱</div>
-      <input type="text" value="${n.company}" onchange="updateNote('${id}','company',this.value)">
-    </div>
-    <div class="field-group">
-      <div class="field-label">日期</div>
-      <input type="date" value="${n.date}" onchange="updateNote('${id}','date',this.value)">
-    </div>
-    <div class="field-group">
-      <div class="field-label">筆記內容</div>
-      <textarea rows="10" onchange="updateNote('${id}','content',this.value)">${n.content}</textarea>
-    </div>
+function openNotePanel(id){
+  const n=notes.find(x=>x.id===id); if(!n)return;
+  document.getElementById('panel-title').textContent=n.company+' — 筆記';
+  document.getElementById('panel-body').innerHTML=`
+    <div class="field-group"><div class="field-label">客戶名稱</div><input type="text" value="${n.company}" onchange="updateNote('${id}','company',this.value)"></div>
+    <div class="field-group"><div class="field-label">日期</div><input type="date" value="${n.date}" onchange="updateNote('${id}','date',this.value)"></div>
+    <div class="field-group"><div class="field-label">筆記內容</div><textarea rows="10" onchange="updateNote('${id}','content',this.value)">${n.content}</textarea></div>
     <div class="divider"></div>
-    <button class="btn btn-ghost" style="color:var(--red);border-color:var(--red);width:100%" onclick="deleteNote('${id}')">刪除筆記</button>
+    <button class="btn btn-ghost" style="width:100%;color:var(--red);border-color:var(--red)" onclick="deleteNote('${id}')">刪除筆記</button>
   `;
   document.getElementById('panel-overlay').classList.add('open');
 }
 
-function updateNote(id, field, value) {
-  const n = notes.find(x => x.id === id);
-  if (n) { n[field] = value; save(); }
+function updateNote(id,field,val){const n=notes.find(x=>x.id===id);if(n){n[field]=val;save();}}
+function deleteNote(id){if(!confirm('確定刪除這則筆記？'))return;notes=notes.filter(x=>x.id!==id);save();closePanel();renderNotes();}
+
+// ─────────────────────────────────────────────
+// 流程欄位管理
+// ─────────────────────────────────────────────
+let _editCols=[];
+
+function openColMgr(){
+  _editCols=COLS.map(c=>({...c}));
+  renderColMgrList();
+  document.getElementById('col-mgr-modal').classList.add('open');
 }
 
-function deleteNote(id) {
-  if (!confirm('確定刪除這則筆記？')) return;
-  notes = notes.filter(x => x.id !== id);
-  save();
-  document.getElementById('panel-overlay').classList.remove('open');
-  renderNotes();
+function renderColMgrList(){
+  document.getElementById('col-mgr-list').innerHTML=_editCols.map((col,i)=>`
+    <div class="col-mgr-row" id="cmr-${i}">
+      <input type="color" value="${col.color}" onchange="_editCols[${i}].color=this.value;document.getElementById('cmd-dot-${i}').style.background=this.value">
+      <div id="cmd-dot-${i}" class="col-color-dot" style="background:${col.color};width:0;padding:0;border:none"></div>
+      <input type="text" value="${col.label}" placeholder="欄位名稱" onchange="_editCols[${i}].label=this.value" style="flex:1">
+      <button class="col-order-btn" onclick="moveCol(${i},-1)" ${i===0?'disabled':''}>↑</button>
+      <button class="col-order-btn" onclick="moveCol(${i},1)" ${i===_editCols.length-1?'disabled':''}>↓</button>
+      <button class="del-btn" onclick="removeColRow(${i})" title="刪除">×</button>
+    </div>`).join('');
 }
 
-// ══════════════════════════════════════════════
+function moveCol(i,dir){
+  const j=i+dir; if(j<0||j>=_editCols.length)return;
+  [_editCols[i],_editCols[j]]=[_editCols[j],_editCols[i]];
+  renderColMgrList();
+}
+
+function removeColRow(i){
+  const col=_editCols[i];
+  const count=cases.filter(c=>c.status===col.id).length;
+  if(count>0){alert(`「${col.label}」欄位還有 ${count} 個案件，請先移動或刪除後再移除此欄位。`);return;}
+  _editCols.splice(i,1);
+  renderColMgrList();
+}
+
+function addColRow(){
+  _editCols.push({id:'col'+Date.now(),label:'新欄位',color:'#7A8AAA'});
+  renderColMgrList();
+}
+
+function saveColumns(){
+  if(_editCols.some(c=>!c.label.trim())){alert('欄位名稱不能為空');return;}
+  COLS=_editCols.map(c=>({...c,label:c.label.trim()}));
+  save(); closeMod('col-mgr-modal'); renderKanban();
+}
+
+// ─────────────────────────────────────────────
+// 匯出
+// ─────────────────────────────────────────────
+function exportData(){
+  const blob=new Blob([JSON.stringify({cases,notes,hlog,COLS,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`kanban_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ─────────────────────────────────────────────
 // Tab 切換
-// ══════════════════════════════════════════════
+// ─────────────────────────────────────────────
+const TABS=['kanban','pipeline','calendar','notes','history'];
 
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', ['kanban','week','notes'][i] === name);
-  });
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  if (name === 'kanban') renderKanban();
-  if (name === 'week') renderWeek();
-  if (name === 'notes') renderNotes();
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',TABS[i]===name));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  if(name==='kanban')   renderKanban();
+  if(name==='pipeline') renderPipeline();
+  if(name==='calendar') renderCalendar();
+  if(name==='notes')    renderNotes();
+  if(name==='history')  renderHistory();
 }
 
-// 關閉 modal（點背景）
-document.getElementById('add-modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('add-modal')) closeAddModal();
-});
-document.getElementById('note-modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('note-modal')) closeNoteModal();
+// ─────────────────────────────────────────────
+// Modal helpers
+// ─────────────────────────────────────────────
+function closeMod(id){document.getElementById(id).classList.remove('open');}
+
+['add-modal','note-modal','cal-modal','col-mgr-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',e=>{
+    if(e.target===document.getElementById(id)){
+      closeMod(id);
+      if(id==='add-modal')closeAddModal();
+      if(id==='note-modal')closeNoteModal();
+    }
+  });
 });
 
-// ══════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closePanel();
+    ['add-modal','note-modal','cal-modal','col-mgr-modal'].forEach(closeMod);
+    closeAddModal(); closeNoteModal();
+  }
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openAddModal();}
+});
+
+// ─────────────────────────────────────────────
 // 初始化
-// ══════════════════════════════════════════════
+// ─────────────────────────────────────────────
+updateHdrWeek();
 renderKanban();
 </script>
 </body>
