@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+:root{
+  --bg:#F5F6F8;--card:#fff;--ink:#1D2433;--sub:#6B7385;--line:#E3E6EC;--accent:#2C6EE8;
+  --ok:#18A96B;--warn:#D4860A;--bad:#D64545;--soft:#EEF3FD;
+  --c-prepare:#9AA8C2;--c-proposal:#2C6EE8;--c-waiting:#D4860A;--c-closing:#18A96B;--c-exec:#6B4FC8;--c-done:#4A5568;--c-lost:#B0B7C3;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+.hdr{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.logo{font-weight:700;font-size:17px}.logo span{color:var(--accent)}
+.tabs{display:flex;gap:4px;background:var(--bg);padding:3px;border-radius:9px}
+.tab{border:0;background:none;padding:5px 12px;border-radius:7px;cursor:pointer;color:var(--sub)}
+.tab.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08);font-weight:600}
+.hdr-r{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search{border:1px solid var(--line);border-radius:8px;padding:5px 10px;width:170px;background:#fff}
+.chk{display:flex;gap:5px;align-items:center;color:var(--sub);font-size:13px;cursor:pointer;user-select:none}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 11px;cursor:pointer}
+.btn:hover{background:var(--bg)}.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sm{padding:3px 8px;font-size:12px}.btn:disabled{opacity:.5;cursor:default}
+.stats{display:flex;gap:8px;padding:10px 16px 0;flex-wrap:wrap}
+.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 12px;font-size:13px;color:var(--sub)}
+.stat b{color:var(--ink);font-size:15px;margin-right:2px}.stat.alert b{color:var(--bad)}
+.view{display:none;padding:12px 16px 40px}.view.on{display:block}
+/* kanban */
+.board{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;align-items:flex-start}
+.col{flex:0 0 270px;background:#EBEDF1;border-radius:12px;padding:8px;min-height:120px}
+.col.over{outline:2px dashed var(--accent);outline-offset:-2px}
+.col-h{display:flex;align-items:center;gap:6px;padding:4px 6px 8px;font-weight:600}
+.dot{width:9px;height:9px;border-radius:50%}.cnt{color:var(--sub);font-weight:400;font-size:12px}
+.card{background:var(--card);border-radius:10px;padding:10px 11px;margin-bottom:8px;box-shadow:0 1px 2px rgba(16,24,40,.06);cursor:pointer;border-left:3px solid transparent}
+.card:hover{box-shadow:0 2px 8px rgba(16,24,40,.12)}.card.hid{opacity:.5}
+.card .co{font-weight:600;margin-bottom:4px}
+.meta{display:flex;flex-wrap:wrap;gap:4px 8px;font-size:12px;color:var(--sub)}
+.pill{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;background:var(--bg);color:var(--sub)}
+.pill.g{background:#F3F0FF;color:#6B4FC8;font-weight:600}.pill.red{background:#FDECEC;color:var(--bad)}
+.pill.amb{background:#FFF5E6;color:var(--warn)}.pill.grn{background:#E8F7F0;color:var(--ok)}.pill.blu{background:var(--soft);color:var(--accent)}
+.next{font-size:12px;margin-top:5px;color:var(--ink)}
+.bar{height:4px;background:var(--line);border-radius:4px;margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok)}
+/* list */
+.sec-t{font-weight:700;margin:14px 0 8px}
+.cgrid{gap:0 10px}.cf.miss .in{border-color:#d23c3c;background:#fdf1f1}
+.cq{padding:6px 0;border-bottom:1px dashed var(--line,#e5e2dd)}.cq:last-child{border-bottom:none}.cq .chk{color:var(--ink);display:flex;gap:6px;align-items:flex-start;font-size:13px;line-height:1.5;margin-bottom:4px}.cq .chk input{margin-top:3px}
+.li{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:center;cursor:pointer}
+.li .d{width:92px;font-variant-numeric:tabular-nums;color:var(--sub);font-size:13px}.li .d.red{color:var(--bad);font-weight:600}
+.li .m{flex:1;min-width:0}.empty{color:var(--sub);padding:8px 2px}
+/* calendar */
+.cal-h{display:flex;gap:8px;align-items:center;margin-bottom:10px}.cal-h b{font-size:16px;min-width:110px;text-align:center}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .wd{font-size:12px;color:var(--sub);text-align:center}
+.cal .day{background:#fff;border-radius:8px;min-height:84px;padding:4px 5px;font-size:12px;border:1px solid var(--line)}
+.cal .day.out{opacity:.4}.cal .day.today{border-color:var(--accent)}
+.ev{display:block;border-radius:5px;padding:1px 4px;margin-top:2px;font-size:11px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev.act{background:#F3F0FF;color:#6B4FC8}.ev.trk{background:#FFF5E6;color:var(--warn)}
+/* panel */
+.ov{position:fixed;inset:0;background:rgba(16,24,40,.35);z-index:50;display:none}.ov.on{display:block}
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(640px,100%);background:#fff;z-index:51;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s}
+.panel.on{transform:none}
+.p-h{padding:14px 18px 0;border-bottom:1px solid var(--line)}
+.p-t{display:flex;gap:8px;align-items:flex-start}.p-t h2{margin:0;font-size:18px;flex:1}
+.x{border:0;background:none;font-size:22px;line-height:1;cursor:pointer;color:var(--sub)}
+.p-sub{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px;align-items:center}
+.p-tabs{display:flex;gap:16px}.p-tab{border:0;background:none;padding:8px 0;cursor:pointer;color:var(--sub);border-bottom:2px solid transparent}
+.p-tab.on{color:var(--ink);border-color:var(--accent);font-weight:600}
+.p-b{flex:1;overflow-y:auto;padding:14px 18px 90px}
+.p-f{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 18px;display:flex;gap:8px;justify-content:flex-end;align-items:center}
+.grid{display:grid;grid-template-columns:96px 1fr;gap:6px 10px;font-size:13px}.grid .k{color:var(--sub)}
+.grid .v{white-space:pre-wrap;word-break:break-word}
+.fld{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}.fld label{font-size:12px;color:var(--sub)}
+.in{border:1px solid var(--line);border-radius:8px;padding:6px 9px;width:100%;background:#fff}
+textarea.in{min-height:64px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.notes{background:var(--bg);border-radius:8px;padding:8px 10px;font-size:12.5px;white-space:pre-wrap;max-height:220px;overflow:auto}
+.ck{display:flex;gap:6px;align-items:center;margin-bottom:4px}.ck input[type=text]{flex:1}
+.bs{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.bs-h{background:var(--bg);padding:7px 12px;font-weight:600;display:flex;justify-content:space-between;cursor:pointer}
+.bs-b{padding:10px 12px}.bs.closed .bs-b{display:none}
+.bf{display:grid;grid-template-columns:118px 1fr 34px;gap:6px;align-items:start;margin-bottom:6px}
+.bf label{font-size:12.5px;color:var(--sub);padding-top:6px}
+.st{border:1px solid var(--line);background:#fff;border-radius:7px;height:31px;cursor:pointer;font-size:14px}
+.st.ok{background:#E8F7F0;border-color:#BDE8D3}.st.na{background:var(--bg)}.st.todo{background:#FFF5E6;border-color:#F3D9A8}
+.sugg{font-size:11px;color:var(--accent);cursor:pointer}
+.out{margin-bottom:16px}.out-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-weight:600}
+.out textarea{width:100%;min-height:180px;font-size:12.5px;font-family:inherit;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--bg)}
+/* modal & toast */
+.mod{position:fixed;inset:0;background:rgba(16,24,40,.4);z-index:60;display:none;align-items:center;justify-content:center;padding:16px}
+.mod.on{display:flex}.mod-b{background:#fff;border-radius:14px;padding:18px;width:min(420px,100%)}
+.mod-b h3{margin:0 0 4px}.mod-b p{margin:0 0 12px;color:var(--sub);font-size:13px}
+.mod-f{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1D2433;color:#fff;padding:9px 16px;border-radius:9px;z-index:70;display:none;max-width:90%}
+.loading{padding:60px;text-align:center;color:var(--sub)}
+.lock{position:fixed;inset:0;background:var(--bg);z-index:80;display:none;align-items:center;justify-content:center;padding:16px}
+.lock.on{display:flex}.lock-b{background:#fff;border-radius:16px;padding:28px 24px;width:min(340px,100%);text-align:center;box-shadow:0 4px 24px rgba(16,24,40,.08)}
+.lock-b h2{margin:0 0 6px;font-size:18px}.lock-b p{margin:0 0 16px;color:var(--sub);font-size:13px}
+.lock-b input{font-size:22px;letter-spacing:8px;text-align:center;margin-bottom:12px}
+.lock-err{color:var(--bad);font-size:13px;min-height:18px;margin-bottom:8px}
+@media (max-width:640px){
+  .search{width:120px}.col{flex-basis:84vw}.row2{grid-template-columns:1fr}.bf{grid-template-columns:1fr 34px}.bf label{grid-column:1/3;padding:0}
+  .cal .day{min-height:58px}.ev{font-size:10px}
+}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="logo">案件<span>看板</span></div>
+  <div class="tabs">
+    <button class="tab on" data-v="kanban">看板</button>
+    <button class="tab" data-v="follow">追蹤</button>
+    <button class="tab" data-v="cal">行事曆</button>
+  </div>
+  <div class="hdr-r">
+    <input class="search" id="q" placeholder="搜尋公司…">
+    <label class="chk"><input type="checkbox" id="showHidden">顯示隱藏</label>
+    <button class="btn" id="reload" title="重新讀取案件表">↻</button>
+  </div>
+</div>
+<div class="stats" id="stats"></div>
+<div class="view on" id="v-kanban"><div class="loading">讀取案件表中…</div></div>
+<div class="view" id="v-follow"></div>
+<div class="view" id="v-cal"></div>
+
+<div class="ov" id="ov"></div>
+<div class="panel" id="panel">
+  <div class="p-h">
+    <div class="p-t"><h2 id="p-title"></h2><button class="x" id="p-close">×</button></div>
+    <div class="p-sub" id="p-sub"></div>
+    <div class="p-tabs">
+      <button class="p-tab on" data-p="info">概要</button>
+      <button class="p-tab" data-p="call">電訪</button>
+      <button class="p-tab" data-p="brief">活動確認單</button>
+      <button class="p-tab" data-p="out">產出</button>
+    </div>
+  </div>
+  <div class="p-b" id="p-body"></div>
+  <div class="p-f" id="p-foot"></div>
+</div>
+
+<div class="mod" id="mod"><div class="mod-b" id="mod-b"></div></div>
+<div class="toast" id="toast"></div>
+<div class="lock" id="lock"><div class="lock-b"><h2>案件<span style="color:var(--accent)">看板</span></h2><p>請輸入 PIN 碼</p><input class="in" id="pin-in" type="password" inputmode="numeric" autocomplete="current-password"><div class="lock-err" id="pin-err"></div><label class="chk" style="justify-content:center;margin-bottom:12px"><input type="checkbox" id="pin-rem" checked>這台裝置記住 PIN</label><button class="btn pri" id="pin-ok" style="width:100%">進入</button></div></div>
+
+<script>
+// ───────── 設定 ─────────
+var COLS = [
+  {id:'prepare', label:'準備提案', cat:'prep'},
+  {id:'proposal',label:'提案中',   cat:'prop'},
+  {id:'waiting', label:'等待回覆', cat:'prop'},
+  {id:'closing', label:'收尾簽約', cat:'prop'},
+  {id:'exec',    label:'活動籌備', cat:'won'},
+  {id:'done',    label:'結案',     cat:'won'},
+  {id:'lost',    label:'未成交',   cat:'lost'}
+];
+var CAT_STATUS = {prep:'聯繫中待提案', prop:'已提案待追蹤', won:'成交'};
+var CAT_DEFAULT = {prep:'prepare', prop:'waiting', won:'exec', lost:'lost'};
+var LOST = ['已提案未成交','不提案/合併/失案'];
+
+var D = null, CASES = [], SECTIONS = [], ALL_FIELDS = [];
+var cur = null, pTab = 'info', draft = null, callDraft = null, calY, calM;
+
+// ───────── 共用 ─────────
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m,ms){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(function(){t.style.display='none';},ms||2600);}
+var PIN='';try{PIN=localStorage.getItem('kb_pin')||sessionStorage.getItem('kb_pin')||'';}catch(e){}
+function run(fn){var args=[PIN].concat([].slice.call(arguments,1));return new Promise(function(res,rej){
+  google.script.run.withSuccessHandler(res).withFailureHandler(function(e){
+    var m=e&&e.message?e.message:String(e);
+    if(m.indexOf('AUTH:')>=0){showLock(m.split('AUTH:')[1]);}
+    rej(new Error(m.replace(/^.*AUTH:/,'')));})[fn].apply(null,args);});}
+function showLock(msg){try{localStorage.removeItem('kb_pin');sessionStorage.removeItem('kb_pin');}catch(e){}PIN='';
+  $('pin-err').textContent=msg||'';
+  $('lock').classList.add('on');setTimeout(function(){$('pin-in').focus();},50);}
+function tryPin(){
+  var v=$('pin-in').value.trim();if(!v)return;$('pin-ok').disabled=true;$('pin-err').textContent='';PIN=v;
+  run('checkPin').then(function(){
+    try{($('pin-rem').checked?localStorage:sessionStorage).setItem('kb_pin',v);}catch(e){}
+    $('lock').classList.remove('on');$('pin-in').value='';$('pin-ok').disabled=false;load();
+  }).catch(function(e){$('pin-err').textContent=e.message;$('pin-ok').disabled=false;$('pin-in').select();});
+}
+function today(){var d=new Date();return ymd(d);}
+function ymd(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+function parseDate(s){
+  if(!s)return null; var m=String(s).match(/(20\d\d)[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);
+  if(!m)return null; return m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);
+}
+function daysFrom(ds){if(!ds)return null;var a=new Date(ds+'T00:00:00'),b=new Date(today()+'T00:00:00');return Math.round((a-b)/864e5);}
+function money(v){var n=parseFloat(String(v).replace(/[^\d.]/g,''));return isNaN(n)?String(v||''):'$'+n.toLocaleString();}
+function catOf(p){if(LOST.indexOf(p)>=0)return 'lost';if(p==='成交')return 'won';if(p==='已提案待追蹤')return 'prop';return 'prep';}
+function colById(id){for(var i=0;i<COLS.length;i++)if(COLS[i].id===id)return COLS[i];return null;}
+function effCol(c){var cat=catOf(c.progress),bc=colById(c.board.column);return (bc&&bc.cat===cat)?bc.id:CAT_DEFAULT[cat];}
+function isVisible(c){var v=c.board.visible;if(v==='開')return true;if(v==='關')return false;return catOf(c.progress)!=='lost';}
+function actDate(c){return parseDate(c.brief&&c.brief.values['活動日期'])||parseDate(c.planDate);}
+function progress(c){
+  if(!c.brief||!c.brief.progress)return null;var p=c.brief.progress.split('/');
+  return {done:+p[0],total:+p[1]};
+}
+function byId(id){for(var i=0;i<CASES.length;i++)if(CASES[i].id===id)return CASES[i];return null;}
+
+// ───────── 載入 ─────────
+function load(){
+  return run('getData').then(function(d){
+    D=d;CASES=d.cases;SECTIONS=d.sections;ALL_FIELDS=[];
+    SECTIONS.forEach(function(s){ALL_FIELDS=ALL_FIELDS.concat(s[1]);});
+    renderAll();
+  }).catch(function(e){if(!$('lock').classList.contains('on'))$('v-kanban').innerHTML='<div class="loading">讀取失敗：'+esc(e.message)+'</div>';});
+}
+function filtered(){
+  var q=$('q').value.trim().toLowerCase(),sh=$('showHidden').checked;
+  return CASES.filter(function(c){
+    if(q&&(c.company+' '+c.id+' '+c.contact).toLowerCase().indexOf(q)<0)return false;
+    return sh||isVisible(c);
+  });
+}
+function renderAll(){renderStats();renderKanban();renderFollow();renderCal();if(cur)renderPanel();}
+
+// ───────── 統計 ─────────
+function renderStats(){
+  var vis=CASES.filter(isVisible);
+  var active=vis.filter(function(c){var k=catOf(c.progress);return k==='prep'||k==='prop';}).length;
+  var overdue=vis.filter(function(c){var d=daysFrom(parseDate(c.track));return d!==null&&d<0&&catOf(c.progress)!=='lost';}).length;
+  var soon=vis.filter(function(c){var d=daysFrom(actDate(c));return d!==null&&d>=0&&d<=14;});
+  var soonTodo=soon.filter(function(c){var p=progress(c);return !p||p.done<p.total;}).length;
+  var hidden=CASES.length-vis.length;
+  $('stats').innerHTML=
+    '<div class="stat"><b>'+active+'</b>件進行中</div>'+
+    '<div class="stat'+(overdue?' alert':'')+'"><b>'+overdue+'</b>件追蹤逾期</div>'+
+    '<div class="stat'+(soonTodo?' alert':'')+'"><b>'+soon.length+'</b>場活動在 14 天內'+(soonTodo?'（'+soonTodo+' 場確認單未完成）':'')+'</div>'+
+    '<div class="stat"><b>'+hidden+'</b>件隱藏中</div>';
+}
+
+// ───────── 看板 ─────────
+function renderKanban(){
+  var list=filtered(),sh=$('showHidden').checked,html='<div class="board">';
+  COLS.forEach(function(col){
+    var cs=list.filter(function(c){return effCol(c)===col.id;});
+    if(col.id==='lost'&&!cs.length&&!sh)return;
+    cs.sort(function(a,b){return (a.track||'9')<(b.track||'9')?-1:1;});
+    html+='<div class="col" data-col="'+col.id+'"><div class="col-h"><span class="dot" style="background:var(--c-'+col.id+')"></span>'+col.label+' <span class="cnt">'+cs.length+'</span></div>';
+    cs.forEach(function(c){html+=cardHtml(c);});
+    html+='</div>';
+  });
+  $('v-kanban').innerHTML=html+'</div>';
+  bindDnD();
+}
+function cardHtml(c){
+  var col=effCol(c),meta=[],pills=[];
+  if(c.grade)pills.push('<span class="pill g">'+esc(c.grade)+'</span>');
+  if(c.progress&&catOf(c.progress)!=='prop'&&catOf(c.progress)!=='prep'||c.progress==='')pills.push('<span class="pill">'+esc(c.progress||'現況空白')+'</span>');
+  var td=parseDate(c.track),dd=daysFrom(td);
+  if(td&&catOf(c.progress)!=='lost'&&col!=='done')pills.push('<span class="pill '+(dd<0?'red':dd<=2?'amb':'')+'">⏰ '+td.slice(5)+'</span>');
+  var ad=actDate(c),da=daysFrom(ad);
+  if(ad)pills.push('<span class="pill '+(da!==null&&da>=0&&da<=7?'blu':'')+'">🎯 '+ad.slice(5)+'</span>');
+  if(c.board.mail)pills.push('<span class="pill amb">✉ '+esc(c.board.mail)+'</span>');
+  if(c.headcount)meta.push('👥 '+esc(c.headcount));
+  if(c.deal)meta.push(money(c.deal));else if(c.quote)meta.push('報價 '+esc(c.quote));
+  var p=progress(c),bar='';
+  if(p&&p.total){var pct=Math.round(p.done/p.total*100);bar='<div class="bar" title="確認單 '+p.done+'/'+p.total+'"><i style="width:'+pct+'%;background:'+(da!==null&&da<=7&&pct<100?'var(--bad)':'var(--ok)')+'"></i></div>';}
+  return '<div class="card'+(isVisible(c)?'':' hid')+'" draggable="true" data-id="'+c.id+'" style="border-left-color:var(--c-'+col+')">'+
+    '<div class="co">'+esc(c.company)+'</div><div class="meta">'+pills.join('')+'</div>'+
+    (meta.length?'<div class="meta" style="margin-top:4px">'+meta.join('　')+'</div>':'')+
+    (c.board.next?'<div class="next">→ '+esc(c.board.next)+'</div>':'')+bar+'</div>';
+}
+function bindDnD(){
+  [].forEach.call(document.querySelectorAll('.card'),function(el){
+    el.onclick=function(){openPanel(el.getAttribute('data-id'));};
+    el.ondragstart=function(e){e.dataTransfer.setData('text/plain',el.getAttribute('data-id'));};
+  });
+  [].forEach.call(document.querySelectorAll('.col'),function(col){
+    col.ondragover=function(e){e.preventDefault();col.classList.add('over');};
+    col.ondragleave=function(){col.classList.remove('over');};
+    col.ondrop=function(e){e.preventDefault();col.classList.remove('over');moveTo(e.dataTransfer.getData('text/plain'),col.getAttribute('data-col'));};
+  });
+}
+
+// ───────── 移動卡片（必要時同步現況） ─────────
+function moveTo(id,colId){
+  var c=byId(id),col=colById(colId);if(!c||!col)return;
+  if(effCol(c)===colId)return;
+  var fromCat=catOf(c.progress);
+  if(col.cat===fromCat){return saveBoardCol(c,colId,'已移到「'+col.label+'」');}
+  if(col.cat==='won')return askWon(c,colId);
+  if(col.cat==='lost')return askLost(c,colId);
+  var st=CAT_STATUS[col.cat];
+  run('setStatus',c.id,{status:st}).then(function(){c.progress=st;return saveBoardCol(c,colId,'已移到「'+col.label+'」，現況改為「'+st+'」');})
+    .catch(function(e){toast('更新失敗：'+e.message,4000);});
+}
+function saveBoardCol(c,colId,msg){
+  c.board.column=colId;renderAll();
+  return run('saveBoard',c.id,{column:colId,company:c.company}).then(function(){toast(msg);}).catch(function(e){toast('看板儲存失敗：'+e.message,4000);});
+}
+function modal(html){$('mod-b').innerHTML=html;$('mod').classList.add('on');}
+function closeModal(){$('mod').classList.remove('on');}
+function askWon(c,colId){
+  modal('<h3>標記為成交</h3><p>比照 App 規則：成交需填成交金額、執行月、成交活動。</p>'+
+    '<div class="fld"><label>成交金額（未稅）'+(c.deal?'－已填，需主管修改':'')+'</label><input class="in" id="w-deal" inputmode="numeric" value="'+esc(c.deal)+'"'+(c.deal?' disabled':'')+'></div>'+
+    '<div class="row2"><div class="fld"><label>執行月</label><input class="in" id="w-month" inputmode="numeric" value="'+esc(c.execMonth)+'" placeholder="例：12"></div>'+
+    '<div class="fld"><label>成交活動</label><input class="in" id="w-act" value="'+esc(c.dealAct)+'" placeholder="例：團隊大富翁"></div></div>'+
+    '<div class="mod-f"><button class="btn" onclick="closeModal()">取消</button><button class="btn pri" id="w-ok">確認成交</button></div>');
+  $('w-ok').onclick=function(){
+    var p={status:'成交',deal:$('w-deal').value.trim(),execMonth:$('w-month').value.trim(),dealAct:$('w-act').value.trim()};
+    if(c.deal)delete p.deal;
+    if((!p.deal&&!c.deal)||!p.execMonth||!p.dealAct){toast('三個欄位都要填');return;}
+    this.disabled=true;
+    run('setStatus',c.id,p).then(function(){
+      c.progress='成交';if(p.deal)c.deal=p.deal;c.execMonth=p.execMonth;c.dealAct=p.dealAct;closeModal();
+      return saveBoardCol(c,colId,'🎉 已標記成交');
+    }).catch(function(e){toast('更新失敗：'+e.message,4000);$('w-ok').disabled=false;});
+  };
+}
+function askLost(c,colId){
+  var opts=D.fail.map(function(f){return '<option'+(f===c.failReason?' selected':'')+'>'+esc(f)+'</option>';}).join('');
+  modal('<h3>移到未成交</h3><p>移過去後預設隱藏，可用「顯示隱藏」找回。</p>'+
+    '<div class="fld"><label>現況</label><select class="in" id="l-st"><option>已提案未成交</option><option>不提案/合併/失案</option></select></div>'+
+    '<div class="fld"><label>不成交原因（不提案/合併/失案 必填）</label><select class="in" id="l-fr"><option value="">—</option>'+opts+'</select></div>'+
+    '<div class="fld"><label>不成交說明</label><input class="in" id="l-fd" value="'+esc(c.failDesc)+'"></div>'+
+    '<div class="mod-f"><button class="btn" onclick="closeModal()">取消</button><button class="btn pri" id="l-ok">確認</button></div>');
+  $('l-ok').onclick=function(){
+    var p={status:$('l-st').value,failReason:$('l-fr').value,failDesc:$('l-fd').value.trim()};
+    if(p.status==='不提案/合併/失案'&&!p.failReason&&!c.failReason){toast('請選擇不成交原因');return;}
+    this.disabled=true;
+    run('setStatus',c.id,p).then(function(){
+      c.progress=p.status;if(p.failReason)c.failReason=p.failReason;if(p.failDesc)c.failDesc=p.failDesc;closeModal();
+      return saveBoardCol(c,colId,'已移到未成交');
+    }).catch(function(e){toast('更新失敗：'+e.message,4000);$('l-ok').disabled=false;});
+  };
+}
+
+// ───────── 追蹤清單 ─────────
+function renderFollow(){
+  var vis=filtered().filter(function(c){return catOf(c.progress)!=='lost';}),h='';
+  var tr=vis.filter(function(c){return parseDate(c.track)&&effCol(c)!=='done';}).sort(function(a,b){return parseDate(a.track)<parseDate(b.track)?-1:1;});
+  h+='<div class="sec-t">需追蹤（依日期）</div>';
+  h+=tr.length?tr.map(function(c){var d=parseDate(c.track),n=daysFrom(d);
+    return li(c,d,n<0,(n<0?'逾期 '+(-n)+' 天':n===0?'今天':n+' 天後')+'　'+esc(c.progress||'現況空白')+(c.board.next?'　→ '+esc(c.board.next):''));}).join(''):'<div class="empty">沒有設定追蹤日期的案件</div>';
+  var ac=vis.filter(function(c){var n=daysFrom(actDate(c));return n!==null&&n>=-1&&n<=45;}).sort(function(a,b){return actDate(a)<actDate(b)?-1:1;});
+  h+='<div class="sec-t">即將舉辦的活動（45 天內）</div>';
+  h+=ac.length?ac.map(function(c){var p=progress(c),n=daysFrom(actDate(c)),ok=p&&p.done===p.total;
+    return li(c,actDate(c),!ok&&n<=7,'確認單 '+(p?p.done+'/'+p.total:'未建立')+(ok?' ✅':'')+'　'+esc(c.headcount||''));}).join(''):'<div class="empty">45 天內沒有已排定日期的活動</div>';
+  var stale=vis.filter(function(c){var k=catOf(c.progress);if(k!=='prep'&&k!=='prop')return false;var u=parseDate(c.updated);return !u||daysFrom(u)<-14;});
+  h+='<div class="sec-t">超過 14 天沒更新</div>';
+  h+=stale.length?stale.map(function(c){return li(c,parseDate(c.updated)||'—',false,esc(c.progress||'現況空白'));}).join(''):'<div class="empty">都有在動 👍</div>';
+  $('v-follow').innerHTML=h;
+  [].forEach.call($('v-follow').querySelectorAll('.li'),function(el){el.onclick=function(){openPanel(el.getAttribute('data-id'));};});
+}
+function li(c,d,red,sub){return '<div class="li" data-id="'+c.id+'"><div class="d'+(red?' red':'')+'">'+esc(d)+'</div><div class="m"><b>'+esc(c.company)+'</b><div class="meta">'+sub+'</div></div></div>';}
+
+// ───────── 行事曆 ─────────
+function renderCal(){
+  if(calY===undefined){var n=new Date();calY=n.getFullYear();calM=n.getMonth();}
+  var first=new Date(calY,calM,1),start=new Date(first);start.setDate(1-first.getDay());
+  var ev={};function add(d,html){if(!d)return;(ev[d]=ev[d]||[]).push(html);}
+  filtered().forEach(function(c){
+    add(actDate(c),'<span class="ev act" data-id="'+c.id+'">🎯 '+esc(c.company)+'</span>');
+    if(catOf(c.progress)!=='lost')add(parseDate(c.track),'<span class="ev trk" data-id="'+c.id+'">⏰ '+esc(c.company)+'</span>');
+  });
+  var h='<div class="cal-h"><button class="btn sm" id="cp">‹</button><b>'+calY+' 年 '+(calM+1)+' 月</b><button class="btn sm" id="cn">›</button><button class="btn sm" id="ct">今天</button>'+
+    '<span class="meta" style="margin-left:auto"><span class="ev act">🎯 活動</span><span class="ev trk">⏰ 追蹤</span></span></div><div class="cal">';
+  '日一二三四五六'.split('').forEach(function(w){h+='<div class="wd">'+w+'</div>';});
+  for(var i=0;i<42;i++){var d=new Date(start);d.setDate(start.getDate()+i);var k=ymd(d);
+    h+='<div class="day'+(d.getMonth()!==calM?' out':'')+(k===today()?' today':'')+'">'+d.getDate()+(ev[k]||[]).join('')+'</div>';}
+  $('v-cal').innerHTML=h+'</div>';
+  $('cp').onclick=function(){calM--;if(calM<0){calM=11;calY--;}renderCal();};
+  $('cn').onclick=function(){calM++;if(calM>11){calM=0;calY++;}renderCal();};
+  $('ct').onclick=function(){calY=undefined;renderCal();};
+  [].forEach.call($('v-cal').querySelectorAll('.ev[data-id]'),function(el){el.onclick=function(){openPanel(el.getAttribute('data-id'));};});
+}
+
+// ───────── 面板 ─────────
+function openPanel(id){
+  cur=byId(id);if(!cur)return;pTab='info';
+  draft={values:{},status:{}};
+  var b=cur.brief||{values:{},status:{}};
+  ALL_FIELDS.forEach(function(f){draft.values[f]=b.values[f]||'';});
+  Object.keys(b.status||{}).forEach(function(k){draft.status[k]=b.status[k];});
+  initCall();
+  $('ov').classList.add('on');$('panel').classList.add('on');renderPanel();
+}
+function closePanel(){
+  if(draft&&draft.dirty&&!confirm('確認單有未儲存的修改，確定關閉？'))return;
+  if(callDraft&&callDraft.dirty&&!confirm('電訪紀錄有未儲存的修改，確定關閉？'))return;
+  $('ov').classList.remove('on');$('panel').classList.remove('on');cur=null;draft=null;callDraft=null;
+}
+function renderPanel(){
+  var c=cur;$('p-title').textContent=c.company;
+  var colOpts=COLS.map(function(x){return '<option value="'+x.id+'"'+(x.id===effCol(c)?' selected':'')+'>'+x.label+'</option>';}).join('');
+  $('p-sub').innerHTML='<span class="pill">'+esc(c.id)+'</span><span class="pill '+(catOf(c.progress)==='won'?'grn':catOf(c.progress)==='lost'?'red':'blu')+'">'+esc(c.progress||'現況空白')+'</span>'+
+    (c.mine?'':'<span class="pill amb">承辦：'+esc(c.handler||'—')+'</span>')+
+    '<select class="in" id="p-move" style="width:auto;padding:2px 6px;font-size:12px">'+colOpts+'</select>'+
+    '<select class="in" id="p-vis" style="width:auto;padding:2px 6px;font-size:12px" title="看板顯示">'+
+      ['自動','開','關'].map(function(v){return '<option'+(c.board.visible===v?' selected':'')+'>'+v+'</option>';}).join('')+'</select>';
+  $('p-move').onchange=function(){moveTo(c.id,this.value);};
+  $('p-vis').onchange=function(){var v=this.value;c.board.visible=v;renderAll();
+    run('saveBoard',c.id,{visible:v,company:c.company}).then(function(){toast(v==='自動'?'顯示：自動（失案隱藏）':v==='開'?'固定顯示在看板':'已從看板隱藏');}).catch(function(e){toast('儲存失敗：'+e.message);});};
+  [].forEach.call(document.querySelectorAll('.p-tab'),function(t){t.classList.toggle('on',t.getAttribute('data-p')===pTab);});
+  if(pTab==='info')renderInfo();else if(pTab==='call')renderCall();else if(pTab==='brief')renderBrief();else renderOut();
+}
+
+// 概要
+function renderInfo(){
+  var c=cur,b=c.board;
+  var rows=[['聯絡人',[c.contact,c.title].filter(Boolean).join('／')],['電話',c.phone],['Email',c.email],['需求',c.need],['目的',c.purpose],
+    ['預計日期',[c.planDate,c.actTime].filter(Boolean).join('　')],['人數',c.headcount],['地點',c.location],['活動形式',c.format],['預算',c.budget],
+    ['報價',c.quote],['成交金額',c.deal?money(c.deal):''],['成交活動',c.dealAct],['不成交原因',[c.failReason,c.failDesc].filter(Boolean).join('：')],['客戶備註',c.remarks],['最後更新',c.updated]]
+    .filter(function(r){return r[1];});
+  var ck=(b.checklist||[]).map(function(it,i){return '<div class="ck"><input type="checkbox" data-i="'+i+'"'+(it.done?' checked':'')+'><input type="text" class="in" data-i="'+i+'" value="'+esc(it.text)+'"><button class="btn sm" data-del="'+i+'">✕</button></div>';}).join('');
+  $('p-body').innerHTML=
+    '<div class="row2"><div class="fld"><label>聯繫狀況</label><select class="in" id="i-cs"><option value="">—</option>'+D.contact.map(function(x){return '<option'+(x===c.contactSt?' selected':'')+'>'+x+'</option>';}).join('')+'</select></div>'+
+    '<div class="fld"><label>需追蹤日期</label><input type="date" class="in" id="i-tr" value="'+esc(parseDate(c.track)||'')+'"></div></div>'+
+    '<div class="fld"><label>下一步（只顯示在看板）</label><input class="in" id="i-next" value="'+esc(b.next)+'" placeholder="例：週四電話確認場地"></div>'+
+    '<div class="fld"><label>新增追蹤備註（寫入案件表，自動加日期）</label><textarea class="in" id="i-note" placeholder="例：已寄出報價 r2"></textarea></div>'+
+    '<div class="fld"><label>案件表備註紀錄</label><div class="notes">'+esc(c.notes||'（尚無）')+'</div></div>'+
+    '<div class="fld"><label>待辦清單</label><div id="i-ck">'+ck+'</div><button class="btn sm" id="i-ck-add">＋ 新增待辦</button></div>'+
+    '<div class="sec-t">提案紀錄（寫入案件表）</div>'+
+    '<div class="fld"><label>活動日期</label><div style="display:flex;gap:6px"><input class="in" id="i-pd" value="'+esc(c.planDate)+'"><button class="btn sm" id="i-pd-save">更新</button></div></div>'+
+    '<div class="notes" style="margin-bottom:8px">'+((c.logs||[]).length?(c.logs||[]).map(function(l){return esc(l.date||'（無日期）')+'｜'+esc(l.content)+(l.pax?'｜'+esc(l.pax)+' 人':'')+(l.quote?'｜'+esc(l.quote):'');}).join('<br>'):'（尚無）')+(c.actDate?'<br>實際提案日：'+esc(parseDate(c.actDate)||c.actDate):'')+'</div>'+
+    '<div class="row2"><div class="fld"><label>提案日期</label><input type="date" class="in" id="i-lg-d"></div><div class="fld"><label>人數</label><input class="in" id="i-lg-p"></div></div>'+
+    '<div class="fld"><label>提案內容</label><input class="in" id="i-lg-c" placeholder="例：團隊大富翁／群生之境"></div>'+
+    '<div class="fld"><label>報價（註明未稅／含稅）</label><input class="in" id="i-lg-q"></div>'+
+    '<div class="fld"><label>補充說明</label><input class="in" id="i-lg-r"></div>'+
+    '<button class="btn sm" id="i-lg-add">＋ 新增提案紀錄</button>'+
+    '<div class="fld" style="margin-top:12px"><label>看板筆記（只存在看板）</label><textarea class="in" id="i-bn">'+esc(b.note)+'</textarea></div>'+
+    '<div class="sec-t">客戶資料</div><div class="grid">'+rows.map(function(r){return '<div class="k">'+r[0]+'</div><div class="v">'+esc(r[1])+'</div>';}).join('')+'</div>';
+  var box=$('i-ck');
+  box.onchange=function(e){var i=+e.target.getAttribute('data-i');if(e.target.type==='checkbox')b.checklist[i].done=e.target.checked;else b.checklist[i].text=e.target.value;};
+  box.onclick=function(e){var d=e.target.getAttribute('data-del');if(d!==null){b.checklist.splice(+d,1);renderInfo();}};
+  $('i-ck-add').onclick=function(){b.checklist=b.checklist||[];b.checklist.push({text:'',done:false});renderInfo();var ins=box.querySelectorAll('input[type=text]');ins[ins.length-1].focus();};
+  $('i-pd-save').onclick=function(){var v=$('i-pd').value.trim(),btn=this;btn.disabled=true;
+    run('setPlanDate',c.id,v).then(function(){c.planDate=v;toast('活動日期已更新');btn.disabled=false;}).catch(function(e){toast('更新失敗：'+e.message,4000);btn.disabled=false;});};
+  $('i-lg-add').onclick=function(){var btn=this;
+    var p={date:$('i-lg-d').value,pax:$('i-lg-p').value.trim(),content:$('i-lg-c').value.trim(),quote:$('i-lg-q').value.trim(),direction:$('i-lg-r').value.trim()};
+    if(!p.date||!p.content){toast('請填提案日期和內容');return;}
+    btn.disabled=true;
+    run('addProposal',c.id,p).then(function(r){c.logs=r.logs;if(r.actDate)c.actDate=r.actDate;toast(r.dup?'這筆提案紀錄已經存在':'已新增提案紀錄');renderInfo();}).catch(function(e){toast('新增失敗：'+e.message,4000);btn.disabled=false;});};
+  $('p-foot').innerHTML='<button class="btn pri" id="i-save">儲存</button>';
+  $('i-save').onclick=saveInfo;
+}
+function saveInfo(){
+  var c=cur,btn=$('i-save');btn.disabled=true;
+  var cs=$('i-cs').value,tr=$('i-tr').value,note=$('i-note').value.trim();
+  var caseP={},jobs=[];
+  if(cs!==c.contactSt)caseP.contactSt=cs;
+  if(tr!==(parseDate(c.track)||''))caseP.track=tr;
+  if(note)caseP.newNote=note;
+  if(Object.keys(caseP).length)jobs.push(run('saveCase',c.id,caseP).then(function(r){if(cs)c.contactSt=cs;if(caseP.track!==undefined)c.track=tr;if(r.notes)c.notes=r.notes;}));
+  c.board.next=$('i-next').value.trim();c.board.note=$('i-bn').value;
+  c.board.checklist=(c.board.checklist||[]).filter(function(x){return x.text.trim();});
+  jobs.push(run('saveBoard',c.id,{next:c.board.next,note:c.board.note,checklist:c.board.checklist,company:c.company}));
+  Promise.all(jobs).then(function(){toast('已儲存');renderAll();}).catch(function(e){toast('儲存失敗：'+e.message,4000);btn.disabled=false;});
+}
+
+// 電訪紀錄
+var CALL_FIELDS=[
+  ['窗口','窗口姓名／職稱',1,'例：Ann／HR'],['聯絡方式','聯絡方式',1,'電話或 Email'],['對焦日期','對焦日期',1,'','date'],
+  ['活動日期','活動日期',1,'例：12/8（二），或 12 月中'],['時段','時段',1,'','sel:半天（3hr）|全天（6hr）|2 小時|兩天一夜|其他（備註說明）'],
+  ['人數','人數',1,'例：35 或 30–35'],['地點區域','地點區域',1,'例：台北內湖'],['場地','場地',1,'','sel:客戶已有場地|需瘋戶外代找|未定'],
+  ['預算','預算（未稅）',1,'沒說就填「未提供」；含稅請寫明'],['活動偏好','活動偏好／方向',1,'例：室內、偏共創、不要太激烈'],
+  ['核心目的與痛點','核心目的與痛點',1,'例：跨部門互動少、新任主管多','big'],['備註','其他備註（提案期限、決策流程）',0,'','big']];
+var CALL_QS=[
+  ['活動核心目的',['這次活動主要希望達成的效果，是偏向關係修復、還是重新建立默契？','團隊目前的互動狀況，是大家各自為政，還是特定部門或人之間有隔閡？','您覺得目前最需要被改善的是信任感、還是溝通方式？','這次活動是誰提出來的？背後有沒有特定的事件或契機？']],
+  ['活動期待與禁忌',['高層或董事長會全程參與嗎？他對活動形式有什麼特別偏好或明確不想要的元素？','上次參加過印象最深、或最不想再重複的活動類型是什麼？','室內 vs. 戶外，如果只能選一個，您個人偏向哪邊？原因是？','競賽型 vs. 共創型，您覺得哪個方向比較符合這次需求？','有沒有特別想避免的活動主題或情境（如過於肢體接觸、太幼稚的遊戲等）？']],
+  ['成功的定義',['活動結束後，您希望參與者會有什麼具體的感受或改變？','如果三個月後回頭看，什麼樣的結果會讓您覺得「這次真的值得」？','有沒有哪個面向，是您不希望活動結束後還是老樣子的？','活動成效您會怎麼向上級或董事長回報？']],
+  ['人員結構與動態',['參與人數確認？其中高階主管 vs. 一般同仁各約幾位？','新進成員大約占多少比例？他們是同時到職還是陸續加入？','這群人平時工作上交集多嗎？還是比較分散在不同業務線？','有沒有需要特別注意的角色——例如資歷很深、較強勢、或在場上容易主導的人？','年齡層分布大概是？有沒有體能上需要留意的限制？']],
+  ['實務條件確認',['活動天數與節奏：幾天幾夜？每天都需要有安排，還是保留自由時間？','預計出發地點？交通距離有限制嗎？','對食宿有特別要求嗎（星級、風格、房型分配等）？','提案截止時間？決策流程是您直接確認，還是需要再向上呈報？']],
+  ['補充挖掘',['以前辦過類似活動嗎？那次最滿意 / 最不滿意的地方是什麼？','這次您最擔心的風險或NG情境是什麼？','還有什麼是您覺得我應該知道、但我還沒問到的？']]];
+function callSugg(f){
+  var c=cur;
+  var m={'窗口':[c.contact,c.title].filter(Boolean).join('／'),'聯絡方式':[c.phone,c.email].filter(Boolean).join('／'),
+    '活動日期':c.planDate,'人數':c.headcount,'地點區域':c.location,'預算':c.budget,'活動偏好':c.format,
+    '核心目的與痛點':[c.purpose,c.need].filter(Boolean).join('；')};
+  return m[f]||'';
+}
+function initCall(){
+  var saved=cur.call;
+  callDraft={values:{},answers:{},dirty:false,saved:!!saved};
+  CALL_FIELDS.forEach(function(x){var f=x[0];
+    callDraft.values[f]=saved?(saved.values[f]||''):(f==='對焦日期'?today():callSugg(f));});
+  if(saved)callDraft.answers=JSON.parse(JSON.stringify(saved.answers||{}));
+}
+function callMissing(){return CALL_FIELDS.filter(function(x){return x[2]&&!String(callDraft.values[x[0]]||'').trim();}).map(function(x){return x[0];});}
+function renderCall(){
+  var miss=callMissing(),reqN=CALL_FIELDS.filter(function(x){return x[2];}).length;
+  var card=CALL_FIELDS.map(function(x){
+    var f=x[0],v=callDraft.values[f]||'',t=x[4]||'',inp;
+    if(t.indexOf('sel:')===0){var o=t.slice(4).split('|');if(v&&o.indexOf(v)<0)o.unshift(v);
+      inp='<select class="in" data-cf="'+esc(f)+'"><option value="">請選擇</option>'+o.map(function(z){return '<option'+(z===v?' selected':'')+'>'+esc(z)+'</option>';}).join('')+'</select>';}
+    else if(t==='big')inp='<textarea class="in" rows="2" data-cf="'+esc(f)+'" placeholder="'+esc(x[3])+'">'+esc(v)+'</textarea>';
+    else inp='<input class="in"'+(t==='date'?' type="date"':'')+' data-cf="'+esc(f)+'" value="'+esc(v)+'" placeholder="'+esc(x[3])+'">';
+    return '<div class="fld cf'+(x[2]&&!v.trim()?' miss':'')+'"><label>'+esc(x[1])+(x[2]?' <b style="color:var(--accent)">*</b>':'')+'</label>'+inp+'</div>';
+  }).join('');
+  var qs=CALL_QS.map(function(sec,si){
+    var n=0;var rows=sec[1].map(function(q,qi){var k=si+'-'+qi,a=callDraft.answers[k]||{};if(a.ck||a.note)n++;
+      return '<div class="cq"><label class="chk"><input type="checkbox" data-ck="'+k+'"'+(a.ck?' checked':'')+'><span>'+esc(q)+'</span></label>'+
+        '<input class="in" data-cn="'+k+'" value="'+esc(a.note||'')+'" placeholder="記錄回應⋯"></div>';}).join('');
+    return '<div class="bs closed"><div class="bs-h"><span>'+esc(sec[0])+'</span><span class="cnt">'+n+'/'+sec[1].length+'</span></div><div class="bs-b">'+rows+'</div></div>';
+  }).join('');
+  $('p-body').innerHTML='<p class="meta" style="margin:0 0 10px">'+(callDraft.saved?'已有電訪紀錄，可直接修改。':'已從案件表帶入現有資料，請確認後補齊。')+'<b style="color:var(--accent)">*</b> 為需求卡必填；下方對焦問題選填。</p>'+
+    '<div class="sec-t" style="margin-top:0">需求卡</div><div class="row2 cgrid">'+card+'</div>'+
+    '<div class="sec-t">對焦問題（選填）</div>'+qs;
+  var body=$('p-body');
+  body.oninput=body.onchange=function(e){
+    var t=e.target,f=t.getAttribute('data-cf'),ck=t.getAttribute('data-ck'),cn=t.getAttribute('data-cn');
+    if(f){callDraft.values[f]=t.value;var w=t.closest('.cf');if(w&&t.value.trim())w.classList.remove('miss');}
+    else if(ck){(callDraft.answers[ck]=callDraft.answers[ck]||{}).ck=t.checked;}
+    else if(cn){(callDraft.answers[cn]=callDraft.answers[cn]||{}).note=t.value;}
+    else return;
+    if(ck||cn){var bs=t.closest('.bs'),cnt=bs&&bs.querySelector('.cnt');if(cnt){var n=0,tot=0;
+      [].forEach.call(bs.querySelectorAll('.cq'),function(q){tot++;if(q.querySelector('[data-ck]').checked||q.querySelector('[data-cn]').value.trim())n++;});cnt.textContent=n+'/'+tot;}}
+    callDraft.dirty=true;updCallFoot();};
+  body.onclick=function(e){var hd=e.target.closest('.bs-h');if(hd)hd.parentNode.classList.toggle('closed');};
+  $('p-foot').innerHTML='<span class="meta" id="c-prog" style="margin-right:auto"></span><button class="btn pri" id="c-save">儲存電訪紀錄</button>';
+  $('c-save').onclick=saveCallNow;updCallFoot();
+}
+function updCallFoot(){var el=$('c-prog');if(!el)return;var reqN=CALL_FIELDS.filter(function(x){return x[2];}).length;
+  el.textContent='必填 '+(reqN-callMissing().length)+'/'+reqN+(callDraft.dirty?'　• 尚未儲存':'');}
+function saveCallNow(){
+  var c=cur,miss=callMissing();
+  if(miss.length){
+    [].forEach.call(document.querySelectorAll('.cf'),function(w){var i=w.querySelector('[data-cf]');if(i&&miss.indexOf(i.getAttribute('data-cf'))>=0)w.classList.add('miss');});
+    if(!confirm('還有 '+miss.length+' 項必填未填：'+miss.join('、')+'\n\n要先存起來，之後再補嗎？'))return;
+  }
+  var answers={};Object.keys(callDraft.answers).forEach(function(k){var a=callDraft.answers[k];if(a.ck||String(a.note||'').trim())answers[k]={ck:!!a.ck,note:String(a.note||'').trim()};});
+  var btn=$('c-save');btn.disabled=true;
+  run('saveCall',c.id,c.company,callDraft.values,answers).then(function(r){
+    c.call={values:JSON.parse(JSON.stringify(callDraft.values)),answers:answers,updated:r.updated};
+    callDraft.dirty=false;callDraft.saved=true;toast('電訪紀錄已儲存（必填 '+r.done+'/'+r.total+'）');btn.disabled=false;updCallFoot();
+  }).catch(function(e){toast('儲存失敗：'+e.message,4000);btn.disabled=false;});
+}
+
+// 活動確認單
+function suggestion(f){
+  var c=cur;
+  var m={'活動日期':parseDate(c.planDate)||c.planDate,'活動時間':c.actTime,'活動人數':c.headcount,'活動地點':c.location,
+    '發票抬頭':c.coTitle||c.company,'統編':c.taxId,'收件資訊':c.address,'未稅金額':c.deal,'品項名稱':c.dealAct,
+    '業務':D.me,'活動聯繫人':[c.contact,c.phone].filter(Boolean).join(' ')};
+  return m[f]||'';
+}
+function fStatus(f){var s=draft.status[f];if(s)return s;return String(draft.values[f]||'').trim()?'ok':'todo';}
+var ST_ICON={todo:'⏳',ok:'✅',na:'—'},ST_NEXT={todo:'ok',ok:'na',na:'todo'};
+function renderBrief(){
+  var h='',done=0;
+  SECTIONS.forEach(function(sec,si){
+    var sd=0;var rows=sec[1].map(function(f){
+      var st=fStatus(f);if(st!=='todo')sd++;
+      var sg=suggestion(f),v=draft.values[f]||'';
+      var big=['關卡','開場流程','講師注意事項','客戶提醒','工作內容/須知','雨備內容','器材','大合照','報到方式'].indexOf(f)>=0;
+      var inp=big?'<textarea class="in" data-f="'+esc(f)+'" rows="2">'+esc(v)+'</textarea>':'<input class="in" data-f="'+esc(f)+'" value="'+esc(v)+'">';
+      return '<div class="bf"><label>'+esc(f)+(sg&&!v?'<br><span class="sugg" data-sg="'+esc(f)+'">帶入：'+esc(String(sg).slice(0,14))+'</span>':'')+'</label>'+inp+
+        '<button class="st '+st+'" data-st="'+esc(f)+'" title="點擊切換：待確認／已確認／不需要">'+ST_ICON[st]+'</button></div>';
+    }).join('');
+    done+=sd;
+    h+='<div class="bs" data-s="'+si+'"><div class="bs-h"><span>'+sec[0]+'</span><span class="cnt">'+sd+'/'+sec[1].length+'</span></div><div class="bs-b">'+rows+'</div></div>';
+  });
+  $('p-body').innerHTML='<p class="meta" style="margin:0 0 10px">⏳ 待確認　✅ 已確認　— 不需要。有填內容會自動視為已確認，可以點右側按鈕改。</p>'+h;
+  var body=$('p-body');
+  body.oninput=function(e){var f=e.target.getAttribute('data-f');if(!f)return;draft.values[f]=e.target.value;draft.dirty=true;
+    if(f==='未稅金額')calcTax();
+    var b=body.querySelector('[data-st="'+cssq(f)+'"]');if(b&&!draft.status[f]){var s=fStatus(f);b.className='st '+s;b.textContent=ST_ICON[s];}
+    updBriefFoot();};
+  body.onclick=function(e){
+    var t=e.target,f=t.getAttribute('data-st');
+    if(f){var n=ST_NEXT[fStatus(f)];draft.status[f]=n;draft.dirty=true;t.className='st '+n;t.textContent=ST_ICON[n];updBriefFoot();return;}
+    var sg=t.getAttribute('data-sg');
+    if(sg){draft.values[sg]=String(suggestion(sg));draft.dirty=true;if(sg==='未稅金額')calcTax();renderBrief();return;}
+    var hd=t.closest('.bs-h');if(hd)hd.parentNode.classList.toggle('closed');
+  };
+  $('p-foot').innerHTML='<span class="meta" id="b-prog" style="margin-right:auto"></span><button class="btn pri" id="b-save">儲存確認單</button>';
+  $('b-save').onclick=saveBriefNow;updBriefFoot();
+}
+function cssq(s){return String(s).replace(/(["\\])/g,'\\$1');}
+function calcTax(){
+  var n=parseFloat(String(draft.values['未稅金額']||'').replace(/[^\d.]/g,''));if(isNaN(n))return;
+  var t=Math.round(n*0.05);draft.values['稅金金額']=String(t);draft.values['含稅金額']=String(n+t);
+  ['稅金金額','含稅金額'].forEach(function(f){var el=document.querySelector('[data-f="'+f+'"]');if(el)el.value=draft.values[f];});
+}
+function briefCount(){var d=0;ALL_FIELDS.forEach(function(f){if(fStatus(f)!=='todo')d++;});return d;}
+function updBriefFoot(){var el=$('b-prog');if(el)el.textContent='確認進度 '+briefCount()+'/'+ALL_FIELDS.length+(draft.dirty?'　• 尚未儲存':'');}
+function saveBriefNow(){
+  var c=cur,btn=$('b-save');btn.disabled=true;
+  // 只把手動設定過的狀態存起來（有填值的自動視為已確認）
+  run('saveBrief',c.id,c.company,draft.values,draft.status).then(function(r){
+    c.brief={values:JSON.parse(JSON.stringify(draft.values)),status:JSON.parse(JSON.stringify(draft.status)),progress:r.progress};
+    draft.dirty=false;toast('確認單已儲存（'+r.progress+'）');renderAll();
+  }).catch(function(e){toast('儲存失敗：'+e.message,4000);btn.disabled=false;});
+}
+
+// 產出
+function v(f){return String(draft.values[f]||'').trim();}
+function pend(){return ALL_FIELDS.filter(function(f){return fStatus(f)==='todo';});}
+function lines(fields,fmt){return fields.filter(function(f){return v(f);}).map(function(f){return (fmt||'')+f+'：'+v(f);});}
+function outHandover(){
+  var c=cur,t=[];
+  t.push('【活動交接】'+c.company+(v('活動日期')?'｜'+v('活動日期'):''));
+  t.push('業務：'+D.me+'　案件：'+c.id+(c.dealAct?'　活動：'+c.dealAct:''));
+  SECTIONS.slice(0,5).forEach(function(s){var l=lines(s[1]);if(l.length){t.push('');t.push('▍'+s[0]);t=t.concat(l);}});
+  var pl=[];
+  SECTIONS.slice(0,5).forEach(function(s){var p=s[1].filter(function(f){return fStatus(f)==='todo';});if(p.length)pl.push('・'+s[0]+'：'+(p.length>6?p.slice(0,6).join('、')+' 等 '+p.length+' 項':p.join('、')));});
+  if(pl.length){t.push('');t.push('⚠️ 尚待確認');t=t.concat(pl);}
+  return t.join('\n');
+}
+function outStaff(){
+  var name=cur.company+(cur.dealAct?' '+cur.dealAct:(v('關卡')?' '+v('關卡').split(/\n/)[0]:''));
+  var t=['【人力調度資訊】',
+    '✨活動名稱：'+name,
+    '✨活動時間：'+[v('活動日期'),v('活動時間')].filter(Boolean).join(' '),
+    '✨活動地點：'+v('活動地點'),
+    '✨集合時間：'+v('集合時間'),
+    '✨集合地點：'+v('集合地點'),
+    '✨工作內容/須知：'+v('工作內容/須知'),
+    '✨需求人數：'+v('人力需求人數'),
+    '✨人力性質：'+v('人力性質'),
+    '✨交通：'+v('人力交通'),
+    '✨工作津貼/費用：'+v('工作津貼/費用')];
+  return t.join('\n');
+}
+function outCalendar(){
+  function g(f){return v(f);}
+  var t=['【專案-'+(g('專案案號')||cur.id)+'】','===活動內容===',
+    '活動日期：'+g('活動日期'),'活動時間：'+g('活動時間'),'集合時間：'+g('集合時間'),
+    '活動人數：'+g('活動人數')+'（分'+(g('分組數')||'____')+'組）','活動對象：'+g('活動對象'),'活動地點：'+g('活動地點'),
+    '關卡-'+g('關卡'),'雨備內容-'+g('雨備內容'),'器材-'+g('器材'),'車輛-'+g('車輛'),'餐食-'+g('餐食'),
+    '問卷：'+(g('問卷')||'待確認'),'名牌：'+(g('名牌')||'待確認'),'',
+    '===人力配置===','講師：'+g('講師'),'業務：'+(g('業務')||D.me),'行政：'+g('行政'),'關主/引導員：'+g('關主/引導員'),'教練：'+g('教練'),
+    outStaff(),'',
+    '===專案進度確認===','報價單：'+(g('報價單歸檔')||'未歸檔'),'保險名單：'+(g('保險名單')||'無'),'餐食代辦：'+(g('餐食代辦')||'無'),
+    '場地代辦：'+(g('場地代辦')||'無'),'設備廠商(音響/帳篷/燈光)：'+g('設備廠商'),'',
+    '===約定事項===','自行分組/現場由講師分組：'+g('分組方式'),'活動聯繫人：'+g('活動聯繫人'),'要帶入的主題：'+g('帶入主題'),
+    '是否有長官致詞：'+g('致詞'),'活動有無slogan：'+g('活動slogan'),'是否頒獎：'+g('頒獎'),'講師注意事項：'+g('講師注意事項'),'',
+    '===發票資訊===','抬頭：'+g('發票抬頭'),'統編：'+g('統編'),'品項名稱：'+g('品項名稱'),'發票日期：'+g('發票日期'),
+    '未稅金額：'+g('未稅金額'),'稅金金額：'+g('稅金金額'),'含稅金額：'+g('含稅金額'),'收件資訊：'+g('收件資訊'),'',
+    '===住宿===','住宿飯店：'+g('住宿飯店'),'地址：'+g('住宿地址'),'費用支付：'+g('住宿費用支付'),'訂房人資料：'+g('訂房人資料'),
+    '停車場：'+g('停車場'),'最晚入住&退房時間：'+g('入住退房時間'),'是否有早餐：'+g('是否有早餐')];
+  if(g('客戶提醒'))t.splice(t.indexOf('===發票資訊==='),0,'⚠️客戶提醒：'+g('客戶提醒'),'');
+  return t.join('\n');
+}
+function renderOut(){
+  var outs=[['後勤交接摘要（貼 LINE 群組）',outHandover()],['人力調度資訊（貼 LINE 群組）',outStaff()],['行事曆說明（貼到活動說明欄）',outCalendar()]];
+  var warn=draft.dirty?'<p class="meta" style="color:var(--warn)">⚠️ 確認單有未儲存的修改，下面內容已包含，但記得回去儲存。</p>':'';
+  $('p-body').innerHTML=warn+outs.map(function(o,i){return '<div class="out"><div class="out-h">'+o[0]+'<button class="btn sm" data-copy="'+i+'">複製</button></div><textarea readonly id="o-'+i+'">'+esc(o[1])+'</textarea></div>';}).join('');
+  $('p-body').onclick=function(e){var i=e.target.getAttribute('data-copy');if(i===null)return;copy($('o-'+i).value);};
+  var cl=cur.board.calId;
+  $('p-foot').innerHTML='<span class="meta" style="margin-right:auto">'+(cl?'📅 已連結'+(cl.indexOf('confirmed')===0?'確定':'暫定')+'行事曆':'📅 尚未連結行事曆')+'</span>'+
+    '<button class="btn" id="o-print">🖨 對焦表</button><button class="btn pri" id="o-cal">同步到行事曆</button>';
+  $('o-print').onclick=printBrief;$('o-cal').onclick=calStart;
+}
+function copy(text){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){toast('已複製');},fallback);}else fallback();
+  function fallback(){var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('已複製');}catch(e){toast('請手動選取複製');}document.body.removeChild(ta);}
+}
+function printBrief(){
+  var c=cur,rows='';
+  SECTIONS.slice(0,4).forEach(function(s){
+    var fs=s[1].filter(function(f){return v(f)||fStatus(f)==='todo';});
+    fs.forEach(function(f,i){
+      rows+='<tr>'+(i===0?'<td rowspan="'+fs.length+'" class="sec">'+s[0]+'</td>':'')+'<td class="k">'+esc(f)+'</td><td'+(f==='客戶提醒'?' class="alert"':'')+'>'+(v(f)?esc(v(f)).replace(/\n/g,'<br>'):'<span class="todo">待確認</span>')+'</td></tr>';
+    });
+  });
+  var w=window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+esc(c.company)+' 活動對焦表</title><style>'+
+    'body{font:13px/1.5 "PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;margin:24px;color:#111}h1{font-size:18px;margin:0 0 4px}'+
+    '.sub{color:#555;margin-bottom:12px}table{border-collapse:collapse;width:100%}td{border:1px solid #999;padding:5px 8px;vertical-align:top}'+
+    '.sec{background:#FBE3D6;text-align:center;font-weight:700;width:40px;writing-mode:vertical-rl;letter-spacing:4px}'+
+    '.k{background:#f4f4f4;width:120px;text-align:center}.alert{background:#FDECEC;font-weight:600}.todo{color:#C47A00}'+
+    '@media print{body{margin:10mm}}</style></head><body>'+
+    '<h1>'+esc(c.company)+'｜活動對焦表</h1><div class="sub">'+esc([v('活動日期'),v('活動時間'),v('活動地點'),v('活動人數')?v('活動人數')+' 人':''].filter(Boolean).join('　'))+'</div>'+
+    '<table>'+rows+'</table><script>window.onload=function(){window.print();}<\/script></body></html>');
+  w.document.close();
+}
+
+
+// ───────── 行事曆同步 ─────────
+function calPayload(){
+  var c=cur,tm=v('活動時間').match(/(\d{1,2})[:：]?(\d{2})\s*[-~～至到]\s*(\d{1,2})[:：]?(\d{2})/);
+  return {date:parseDate(v('活動日期'))||'',start:tm?tm[1]+':'+tm[2]:'',end:tm?tm[3]+':'+tm[4]:'',
+    title:(c.company+' '+(c.dealAct||'')).trim(),location:v('活動地點'),description:outCalendar(),
+    confirmed:catOf(c.progress)==='won',company:c.company,link:c.board.calId||''};
+}
+function calStart(){
+  var p=calPayload();
+  if(!p.date){toast('請先在確認單填「活動日期」',3500);pTab='brief';renderPanel();return;}
+  if(draft.dirty){toast('確認單有未儲存的修改，請先儲存',3500);return;}
+  $('o-cal').disabled=true;toast('查詢行事曆中…');
+  run('calPreview',cur.id,{date:p.date,company:p.company,link:p.link}).then(function(r){
+    $('o-cal').disabled=false;
+    if(r.linked)return calCompare(p,r.linked);
+    if(r.candidates.length)return calPick(p,r.candidates);
+    calConfirmNew(p);
+  }).catch(function(e){$('o-cal').disabled=false;toast(e.message,5000);});
+}
+function calWhere(p){return (p.confirmed?'確定（funoutdoor.go）':'暫定（funoutdoor001）')+'　'+p.date+' '+(p.start||'09:00')+'–'+(p.end||'17:00');}
+function calConfirmNew(p){
+  modal('<h3>建立行事曆行程</h3><p>'+esc(calWhere(p))+'</p><div class="fld"><label>標題</label><div>'+(p.confirmed?'【確定】':'【暫定】')+esc(p.title)+'</div></div>'+
+    '<div class="mod-f"><button class="btn" onclick="closeModal()">取消</button><button class="btn pri" id="c-ok">建立</button></div>');
+  $('c-ok').onclick=function(){calDo(p,'new',false);};
+}
+function calPick(p,cands){
+  var h='<h3>那天已經有相似的行程</h3><p>可能是 LINE 機器人建的。選一個來更新，或建立新的。</p>';
+  cands.forEach(function(e,i){h+='<label class="li" style="cursor:pointer"><input type="radio" name="cp" value="'+i+'"'+(i===0?' checked':'')+'><div class="m"><b>'+esc(e.title)+'</b><div class="meta">'+(e.cal==='confirmed'?'確定':'暫定')+'行事曆　'+esc(e.start)+'–'+esc(e.end)+'</div></div></label>';});
+  h+='<label class="li" style="cursor:pointer"><input type="radio" name="cp" value="new"><div class="m"><b>都不是，建立新行程</b><div class="meta">'+esc(calWhere(p))+'</div></div></label>';
+  modal(h+'<div class="mod-f"><button class="btn" onclick="closeModal()">取消</button><button class="btn pri" id="c-ok">下一步</button></div>');
+  $('c-ok').onclick=function(){var s=document.querySelector('input[name=cp]:checked').value;
+    if(s==='new')return calDo(p,'new',false);calCompare(p,cands[+s]);};
+}
+function calCompare(p,ev){
+  var target=ev.cal+':'+ev.id,old=(ev.description||'').replace(/<br\s*\/?>/g,'\n').replace(/<[^>]+>/g,'').trim(),neu=p.description.trim();
+  var move=(ev.cal==='confirmed')!==p.confirmed;
+  if(!old||old===neu){return calDo(p,target,false);}
+  var ol=old.split('\n').map(function(s){return s.trim();}),nl=neu.split('\n').map(function(s){return s.trim();});
+  var minus=ol.filter(function(l){return l&&nl.indexOf(l)<0;}),plus=nl.filter(function(l){return l&&ol.indexOf(l)<0;});
+  var diff=minus.slice(0,30).map(function(l){return '<div style="color:var(--bad)">－ '+esc(l)+'</div>';}).join('')+
+           plus.slice(0,30).map(function(l){return '<div style="color:var(--ok)">＋ '+esc(l)+'</div>';}).join('');
+  modal('<h3>行事曆說明和看板不同</h3><p>'+esc(ev.title)+'（'+(ev.cal==='confirmed'?'確定':'暫定')+'）'+(move?'<br>⚠️ 案件已成交，會在確定行事曆建新行程，舊的暫定行程標註【已轉確定】（不刪除）':'')+'</p>'+
+    '<div class="notes" style="max-height:300px">'+(diff||'（只有排版差異）')+'</div><p class="meta" style="margin-top:6px">－ 只在行事曆裡　＋ 只在看板裡</p>'+
+    '<div class="mod-f" style="flex-wrap:wrap"><button class="btn" onclick="closeModal()">取消</button>'+
+    '<button class="btn" id="c-keep">保留行事曆說明</button><button class="btn pri" id="c-over">用看板內容覆蓋</button></div>');
+  $('c-keep').onclick=function(){calDo(p,target,true);};
+  $('c-over').onclick=function(){calDo(p,target,false);};
+}
+function calDo(p,target,keepDesc){
+  var q={date:p.date,start:p.start,end:p.end,title:p.title,location:p.location,description:p.description,confirmed:p.confirmed,company:p.company,target:target,keepDesc:keepDesc};
+  [].forEach.call(document.querySelectorAll('#mod-b button'),function(b){b.disabled=true;});
+  run('calSync',cur.id,q).then(function(r){cur.board.calId=r.link;closeModal();toast('📅 '+r.note,4500);renderPanel();})
+    .catch(function(e){closeModal();toast('同步失敗：'+e.message,5000);});
+}
+
+// ───────── 事件 ─────────
+[].forEach.call(document.querySelectorAll('.tab'),function(t){t.onclick=function(){
+  [].forEach.call(document.querySelectorAll('.tab'),function(x){x.classList.toggle('on',x===t);});
+  [].forEach.call(document.querySelectorAll('.view'),function(v){v.classList.toggle('on',v.id==='v-'+t.getAttribute('data-v'));});
+};});
+[].forEach.call(document.querySelectorAll('.p-tab'),function(t){t.onclick=function(){pTab=t.getAttribute('data-p');renderPanel();};});
+$('p-close').onclick=closePanel;$('ov').onclick=closePanel;
+$('mod').onclick=function(e){if(e.target===$('mod'))closeModal();};
+$('q').oninput=function(){renderKanban();renderFollow();renderCal();};
+$('showHidden').onchange=function(){renderKanban();renderFollow();renderCal();};
+$('reload').onclick=function(){if(draft&&draft.dirty&&!confirm('確認單有未儲存的修改，仍要重新讀取？'))return;toast('重新讀取中…');load().then(function(){toast('已更新');});};
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){if($('mod').classList.contains('on'))closeModal();else if(cur)closePanel();}});
+$('pin-ok').onclick=tryPin;$('pin-in').onkeydown=function(e){if(e.key==='Enter')tryPin();};
+if(PIN)load();else showLock('');
+</script>
+</body>
+</html>
