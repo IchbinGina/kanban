@@ -116,6 +116,7 @@ textarea.in{min-height:64px;resize:vertical}
   <div class="hdr-r">
     <input class="search" id="q" placeholder="搜尋公司…">
     <label class="chk"><input type="checkbox" id="showHidden">顯示隱藏</label>
+    <button class="btn" id="newCase" title="新增案件（寫入案件表）">＋ 新案件</button>
     <button class="btn" id="reload" title="重新讀取案件表">↻</button>
   </div>
 </div>
@@ -372,7 +373,7 @@ function renderCal(){
 
 // ───────── 面板 ─────────
 function openPanel(id){
-  cur=byId(id);if(!cur)return;pTab='info';
+  cur=byId(id);if(!cur)return;pTab='info';document.querySelector('.p-tabs').style.display='';
   draft={values:{},status:{}};
   var b=cur.brief||{values:{},status:{}};
   ALL_FIELDS.forEach(function(f){draft.values[f]=b.values[f]||'';});
@@ -409,7 +410,8 @@ function renderInfo(){
     .filter(function(r){return r[1];});
   var ck=(b.checklist||[]).map(function(it,i){return '<div class="ck"><input type="checkbox" data-i="'+i+'"'+(it.done?' checked':'')+'><input type="text" class="in" data-i="'+i+'" value="'+esc(it.text)+'"><button class="btn sm" data-del="'+i+'">✕</button></div>';}).join('');
   $('p-body').innerHTML=
-    '<div class="row2"><div class="fld"><label>聯繫狀況</label><select class="in" id="i-cs"><option value="">—</option>'+D.contact.map(function(x){return '<option'+(x===c.contactSt?' selected':'')+'>'+x+'</option>';}).join('')+'</select></div>'+
+    '<div class="fld"><label>移到欄位（成交／失案會跳出必填欄位）</label><div style="display:flex;gap:4px;flex-wrap:wrap">'+COLS.map(function(x){return '<button class="btn sm" data-mv="'+x.id+'">'+x.label+'</button>';}).join('')+'</div></div>'+
+    '<div class="row2"><div class="fld"><label>聯繫狀況</label><select class="in" id="i-cs"><option value="">—</option>'+D.contact.map(function(x){return '<option'+(x===c.contactSt?' selected':'')+'>'+x+'</option>';}).join('')+'</select><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">'+D.contact.map(function(x){return '<button class="btn sm" data-cs="'+x+'">'+x+'</button>';}).join('')+'</div></div>'+
     '<div class="fld"><label>需追蹤日期</label><input type="date" class="in" id="i-tr" value="'+esc(parseDate(c.track)||'')+'"></div></div>'+
     '<div class="fld"><label>下一步（只顯示在看板）</label><input class="in" id="i-next" value="'+esc(b.next)+'" placeholder="例：週四電話確認場地"></div>'+
     '<div class="fld"><label>新增追蹤備註（寫入案件表，自動加日期）</label><textarea class="in" id="i-note" placeholder="例：已寄出報價 r2"></textarea></div>'+
@@ -429,6 +431,8 @@ function renderInfo(){
   box.onchange=function(e){var i=+e.target.getAttribute('data-i');if(e.target.type==='checkbox')b.checklist[i].done=e.target.checked;else b.checklist[i].text=e.target.value;};
   box.onclick=function(e){var d=e.target.getAttribute('data-del');if(d!==null){b.checklist.splice(+d,1);renderInfo();}};
   $('i-ck-add').onclick=function(){b.checklist=b.checklist||[];b.checklist.push({text:'',done:false});renderInfo();var ins=box.querySelectorAll('input[type=text]');ins[ins.length-1].focus();};
+  [].forEach.call(document.querySelectorAll('[data-mv]'),function(b){b.onclick=function(){var id=cur.id;closePanel();if(!cur)moveTo(id,b.getAttribute('data-mv'));};});
+  [].forEach.call(document.querySelectorAll('[data-cs]'),function(b){b.onclick=function(){$('i-cs').value=b.getAttribute('data-cs');toast('聯繫狀況改為「'+b.getAttribute('data-cs')+'」，按儲存才會寫入');};});
   $('i-pd-save').onclick=function(){var v=$('i-pd').value.trim(),btn=this;btn.disabled=true;
     run('setPlanDate',c.id,v).then(function(){c.planDate=v;toast('活動日期已更新');btn.disabled=false;}).catch(function(e){toast('更新失敗：'+e.message,4000);btn.disabled=false;});};
   $('i-lg-add').onclick=function(){var btn=this;
@@ -443,7 +447,7 @@ function saveInfo(){
   var c=cur,btn=$('i-save');btn.disabled=true;
   var cs=$('i-cs').value,tr=$('i-tr').value,note=$('i-note').value.trim();
   var caseP={},jobs=[];
-  if(cs!==c.contactSt)caseP.contactSt=cs;
+  if(cs&&cs!==c.contactSt)caseP.contactSt=cs;
   if(tr!==(parseDate(c.track)||''))caseP.track=tr;
   if(note)caseP.newNote=note;
   if(Object.keys(caseP).length)jobs.push(run('saveCase',c.id,caseP).then(function(r){if(cs)c.contactSt=cs;if(caseP.track!==undefined)c.track=tr;if(r.notes)c.notes=r.notes;}));
@@ -733,6 +737,30 @@ function calDo(p,target,keepDesc){
   [].forEach.call(document.querySelectorAll('.view'),function(v){v.classList.toggle('on',v.id==='v-'+t.getAttribute('data-v'));});
 };});
 [].forEach.call(document.querySelectorAll('.p-tab'),function(t){t.onclick=function(){pTab=t.getAttribute('data-p');renderPanel();};});
+function openNew(){
+  cur=null;draft=null;callDraft=null;
+  document.querySelector('.p-tabs').style.display='none';
+  $('p-title').textContent='新增案件';$('p-sub').textContent='寫入案件表，承辦人：祈雅';
+  var f=function(id,lb,ph){return '<div class="fld"><label>'+lb+'</label><input class="in" id="'+id+'"'+(ph?' placeholder="'+ph+'"':'')+'></div>';};
+  var sel=function(id,lb,opts,v){return '<div class="fld"><label>'+lb+'</label><select class="in" id="'+id+'">'+opts.map(function(x){return '<option'+(x===v?' selected':'')+'>'+x+'</option>';}).join('')+'</select></div>';};
+  $('p-body').innerHTML=f('n-co','公司名稱（抬頭全銜）*')+
+    '<div class="row2">'+f('n-ct','聯絡人')+f('n-ph','電話')+'</div>'+f('n-em','Email')+
+    '<div class="row2">'+f('n-pd','活動日期','例：2026/11/18')+f('n-hc','人數')+'</div>'+
+    f('n-nd','主要需求','例：群生之境')+'<div class="row2">'+f('n-bg','預算')+f('n-qt','報價','註明未稅／含稅')+'</div>'+
+    '<div class="row2">'+sel('n-pg','現況',['聯繫中待提案','已提案待追蹤'],'聯繫中待提案')+sel('n-cs','聯繫狀況',D.contact,'已聯絡')+'</div>'+
+    '<div class="fld"><label>備註（自動加日期）</label><textarea class="in" id="n-nt"></textarea></div>';
+  $('p-foot').innerHTML='<button class="btn pri" id="n-save">建立案件</button>';
+  $('n-save').onclick=function(){var btn=this;
+    var p={company:$('n-co').value.trim(),contact:$('n-ct').value.trim(),phone:$('n-ph').value.trim(),email:$('n-em').value.trim(),planDate:$('n-pd').value.trim(),headcount:$('n-hc').value.trim(),need:$('n-nd').value.trim(),budget:$('n-bg').value.trim(),quote:$('n-qt').value.trim(),progress:$('n-pg').value,contactSt:$('n-cs').value,note:$('n-nt').value.trim()};if(btn._force)p.force=true;
+    if(!p.company){toast('請填公司名稱');return;}
+    var go=function(){btn.disabled=true;run('createCase',p).then(function(r){
+      if(r.dup){btn.disabled=false;btn._force=true;btn.textContent='仍要新增';toast('案件表已有同名公司：'+r.dup.join('、')+'。確定是不同案件，再按一次「仍要新增」',8000);return;}
+      toast('已建立案件');$('ov').classList.remove('on');$('panel').classList.remove('on');document.querySelector('.p-tabs').style.display='';load();
+    }).catch(function(e){toast('建立失敗：'+e.message,4000);btn.disabled=false;});};
+    go();};
+  $('ov').classList.add('on');$('panel').classList.add('on');
+}
+$('newCase').onclick=openNew;
 $('p-close').onclick=closePanel;$('ov').onclick=closePanel;
 $('mod').onclick=function(e){if(e.target===$('mod'))closeModal();};
 $('q').oninput=function(){renderKanban();renderFollow();renderCal();};

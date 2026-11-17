@@ -23,7 +23,9 @@ function hash_(s) {
   return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s, Utilities.Charset.UTF_8)
     .map(b => ('0' + (b & 255).toString(16)).slice(-2)).join('');
 }
+let INTERNAL_ = false;   // 只有排程 processQueue 執行時為 true，網頁呼叫一律要 PIN
 function auth_(pin) {
+  if (INTERNAL_) return;
   const props = PropertiesService.getScriptProperties();
   const salt = props.getProperty('PIN_SALT'), h = props.getProperty('PIN_HASH');
   if (!salt || !h) throw new Error('AUTH:尚未設定 PIN，請先在編輯器執行 setupPin');
@@ -162,7 +164,7 @@ function getData(pin) {
   const cases = [], missing = [], seen = {};
   for (let i = DATA_ROW - 1; i < main.length; i++) {
     const r = main[i]; const id = String(r[F.ID]).trim();
-    if (!/^(CRM|ESG)-/.test(id)) continue;   // ESG- 案件也收
+    if (!/^(CRM|ESG)-/.test(id) && !/^\d{13}[0-9a-z]{3}$/.test(id)) continue;   // ESG- 案件、手動建檔（時間戳 ID）也收
     if (seen[id]) continue;                     // 編號重複（如 ESG-8）只取第一筆
     seen[id] = true;
     const mine = String(r[F.HANDLER]).trim() === ME;
@@ -285,6 +287,46 @@ function addProposal(pin, id, p) {
     }
     sh.getRange(row, F.UPDATED + 1).setValue(now_());
     return { ok: true, dup: dup, logs: logs, actDate: first ? first.date : '' };
+  });
+}
+
+/** 手動新增案件（格式比照公司 App 的手動建檔：ID＝時間戳＋3 碼，來源 manual，承辦人＝祈雅）。
+ *  p: {company, contact, phone, email, need, planDate, headcount, budget, quote, progress, contactSt, note, force} */
+function createCase(pin, p) {
+  auth_(pin);
+  return withLock_(() => {
+    const sh = sh_(MAIN);
+    const company = String(p.company || '').trim();
+    if (!company) throw new Error('請填公司名稱');
+    const progress = String(p.progress || '聯繫中待提案');
+    if (['聯繫中待提案', '已提案待追蹤'].indexOf(progress) < 0) throw new Error('新案件的現況只能是聯繫中待提案或已提案待追蹤');
+    const cs = String(p.contactSt || '已聯絡');
+    if (CONTACT.indexOf(cs) < 0) throw new Error('聯繫狀況不合法：' + cs);
+    const last = sh.getLastRow();
+    if (!p.force && last >= DATA_ROW) {
+      const key = normCo_(company);
+      const hits = sh.getRange(DATA_ROW, 1, last - DATA_ROW + 1, F.COMPANY + 1).getValues()
+        .filter(r => key && normCo_(String(r[F.COMPANY] || '')) === key)
+        .map(r => String(r[F.ID]) + '（' + (r[F.HANDLER] || '未指派') + '）');
+      if (hits.length) return { ok: false, dup: hits };
+    }
+    const row = new Array(F.PROP_LOGS + 1).fill('');
+    const id = Date.now() + Array.from({ length: 3 }, () => 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]).join('');
+    row[3] = '是'; row[4] = '否';
+    row[F.HANDLER] = ME; row[F.CONTACT_ST] = cs; row[F.PROGRESS] = progress;
+    row[F.QUOTE] = String(p.quote || ''); row[F.ID] = id; row[F.TIME] = now_();
+    row[F.COMPANY] = company; row[F.CONTACT] = String(p.contact || '');
+    row[F.PHONE] = String(p.phone || ''); row[F.EMAIL] = String(p.email || '');
+    row[F.NEED] = String(p.need || ''); row[F.HEADCOUNT] = p.headcount ? Number(p.headcount) || String(p.headcount) : '';
+    row[F.BUDGET] = String(p.budget || '');
+    const note = String(p.note || '').trim();
+    if (note) row[F.NOTES] = '[' + Utilities.formatDate(new Date(), TZ, 'MM/dd') + '] ' + note;
+    row[55] = 'manual'; row[F.UPDATED] = now_(); row[F.PROP_LOGS] = '[]';
+    sh.appendRow(row);
+    const r = sh.getLastRow();
+    // 活動日期以文字寫入，跟 setPlanDate 一致
+    if (p.planDate) sh.getRange(r, F.ACT_DATE2 + 1).setNumberFormat('@').setValue(String(p.planDate).trim());
+    return { ok: true, id: id };
   });
 }
 
@@ -453,3 +495,59 @@ function calSync(pin, id, p) {
     return { ok: true, link: link, note: note, calendar: CAL[key] };
   });
 }
+
+// ── 信件同步佇列：Claude 排程把要更新的內容寫成 JSON 檔放進雲端資料夾，這裡每 10 分鐘套用一次 ──
+// 檔名 q-*.json → 處理後改名 done-（全部成功）／part-（部分失敗）／err-（JSON 壞掉），結果寫在檔案說明
+// 內容：[{type:'proposal', id, date:'yyyy-MM-dd', content, pax, quote, direction}
+//        {type:'status', id, status, from}            ← from 有填時，只有目前現況＝from 才改
+//        {type:'case', id, contactSt, track:'yyyy-MM-dd', newNote}]  ← 同樣備註已存在就不重複寫
+const QUEUE_FOLDER = '1B_rVhjhKRl1KTAwgr3-_j_6deu-eOkq-';
+function processQueue() {
+  const it = DriveApp.getFolderById(QUEUE_FOLDER).getFiles();
+  const files = [];
+  while (it.hasNext()) { const f = it.next(); if (/^q-/.test(f.getName())) files.push(f); }
+  files.sort((a, b) => a.getName() < b.getName() ? -1 : 1);
+  INTERNAL_ = true;
+  try {
+    files.forEach(f => {
+      const name = f.getName();
+      let ops;
+      try { ops = JSON.parse(f.getBlob().getDataAsString('UTF-8')); if (!Array.isArray(ops)) ops = ops.ops || []; }
+      catch (e) { f.setDescription('JSON 解析失敗：' + e.message); f.setName('err-' + name); return; }
+      const res = ops.map(op => {
+        try { return { type: op.type, id: op.id, ok: true, r: applyOp_(op) }; }
+        catch (e) { return { type: op.type, id: op.id, ok: false, error: e.message }; }
+      });
+      f.setDescription(JSON.stringify(res).slice(0, 9000));
+      f.setName((res.every(r => r.ok) ? 'done-' : 'part-') + name);
+    });
+  } finally { INTERNAL_ = false; }
+}
+function applyOp_(op) {
+  if (!op || !op.id) throw new Error('缺案件編號');
+  if (op.type === 'proposal') return addProposal('', op.id, op);
+  if (op.type === 'status') {
+    if (op.from) {
+      const sh = sh_(MAIN); const cur = String(sh.getRange(mainRow_(sh, op.id), F.PROGRESS + 1).getValue() || '');
+      if (cur !== op.from) return { skipped: '目前現況是「' + cur + '」，不改' };
+    }
+    return setStatus('', op.id, op);
+  }
+  if (op.type === 'case') {
+    const p = { contactSt: op.contactSt || '', newNote: op.newNote || '' };
+    if (op.track) p.track = op.track;
+    if (p.newNote) {
+      const sh = sh_(MAIN); const notes = String(sh.getRange(mainRow_(sh, op.id), F.NOTES + 1).getValue() || '');
+      if (notes.indexOf(String(p.newNote).trim()) >= 0) p.newNote = '';
+    }
+    return saveCase('', op.id, p);
+  }
+  throw new Error('未知的操作：' + op.type);
+}
+/** 在編輯器手動執行一次：建立每 10 分鐘執行 processQueue 的觸發條件（重複執行只會保留一個） */
+function installQueueTrigger() {
+  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'processQueue').forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('processQueue').timeBased().everyMinutes(10).create();
+  Logger.log('已建立：每 10 分鐘套用一次看板更新佇列');
+}
+
